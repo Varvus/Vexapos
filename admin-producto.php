@@ -20,14 +20,13 @@
             <hr>
 
             <form action="post">
-                <label>
+                <label class="m-2">
                     *Nombre de Producto:
                     <input type="text" class="form-control m-2" name="wk_nombre" required>
                 </label>
-
-                <label>
+                <label class="m-2">
                     Descripción del Producto:
-                    <input type="text" class="form-control m-2" name="wk_nombre">
+                    <text-area  class="form-control m-2" name="wk_descripcion">
                 </label>
             </form>
 
