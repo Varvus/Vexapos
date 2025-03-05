@@ -10,6 +10,9 @@
 
     </head>
     <body>
+
+    <?php include "php/connect.php" ?>
+    <?php include "php/connect-close.php" ?>
         
         <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
             <div class="container-fluid">
@@ -47,8 +50,6 @@
                 </p>
             </div>
         </div>
-
-        <?php include "php/connect.php" ?>
                 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
