@@ -26,7 +26,7 @@
                 </label>
                 <label class="m-2">
                     Descripción del Producto:
-                    <textarea  class="form-control m-2" name="wk_descripcion" rows="3" />
+                    <textarea  class="form-control m-2" name="wk_descripcion" rows="3"></textarea>
                 </label>
             </form>
 
