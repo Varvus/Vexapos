@@ -21,13 +21,13 @@
 
             <form action="post">
                 <div>
-                    <label class="m-2">
+                    <label class="form-label">
                         *Nombre de Producto:
                         <input type="text" class="form-control m-2" name="wk_nombre" required>
                     </label>
                 </div>
                 <div>
-                    <label class="m-2">
+                    <label class="form-label">
                         Descripción del Producto:
                         <textarea  class="form-control m-2" name="wk_descripcion" rows="3"></textarea>
                     </label>
