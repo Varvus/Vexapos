@@ -14,7 +14,7 @@
 
         <div class="container">
     
-            <h2>Producto</h2>
+            <h2>Productos</h2>
             <hr>
 
             <?php
@@ -82,7 +82,9 @@
                 echo "</tbody>
                     </table>";
             } else {
-                echo "<p>No se encontraron productos para el usuario con cve_usuario = $cve_usuario.</p>";
+                ?>
+                echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = $cve_usuario.</div>';
+            <?php 
             }
 
             ?>
