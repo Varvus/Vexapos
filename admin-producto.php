@@ -14,17 +14,27 @@
 
         <div class="container">
     
+            <?php include "verifica-usuario.php"?>
+
+            <h2>Agregar Producto</h2>
+            <hr>
+
+            <form action="post">
+                <label>
+                    *Nombre de Producto:
+                    <input type="text" class="form-control m-2" name="wk_nombre" required>
+                </label>
+
+                <label>
+                    Descripción del Producto:
+                    <input type="text" class="form-control m-2" name="wk_nombre">
+                </label>
+            </form>
+
             <h2>Productos</h2>
             <hr>
 
             <?php
-            $cve_usuario = $_GET["wk_usua"]; // Este valor puede ser dinámico dependiendo de tu implementación
-
-            if ($cve_usuario == ""){
-                echo '<div class="alert alert-danger">ACCESO DENEGADO</div>';
-                return;
-            }
-
             // Consulta SQL
             $sql = "SELECT 
                         p.cve_producto, 
@@ -82,11 +92,8 @@
                 echo "</tbody>
                     </table>";
             } else {
-                ?>
                 echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = $cve_usuario.</div>';
-            <?php 
             }
-
             ?>
 
 
