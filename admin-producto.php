@@ -16,7 +16,7 @@
         <hr>
 
         <?php
-        $cve_usuario = 123; // Este valor puede ser dinámico dependiendo de tu implementación
+        $cve_usuario = $_GET["wk_usua"]; // Este valor puede ser dinámico dependiendo de tu implementación
 
         // Consulta SQL
         $sql = "SELECT 
