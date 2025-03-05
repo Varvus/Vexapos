@@ -13,6 +13,8 @@
 
     <?php include "php/connect.php" ?>
     <?php include "php/connect-close.php" ?>
+
+    <?php include "connect.php" ?>
         
         <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
             <div class="container-fluid">
@@ -46,7 +48,7 @@
                 <hr class="my-4">
                 <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
                 <p class="lead">
-                  <a class="btn btn-primary btn-lg" href="admin-dashboard.htm" role="button">Entrar</a>
+                  <a class="btn btn-primary btn-lg" href="admin-dashboard.php" role="button">Entrar</a>
                 </p>
             </div>
         </div>
