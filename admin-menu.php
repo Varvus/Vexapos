@@ -7,16 +7,16 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-0 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link" href="admin-dashboard.htm">Inicio</a>
+                <a class="nav-link" href="admin-dashboard.php">Inicio</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="admin-producto.htm">Producto</a>
+                <a class="nav-link" href="admin-producto.php">Producto</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="admin-venta.htm">Venta</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="index.htm">Salir</a>
+                <a class="nav-link" href="index.php">Salir</a>
             </li>
         </ul>
         </div>
