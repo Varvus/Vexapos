@@ -46,7 +46,7 @@
             $inventario = 0;
             $aplica_inventario = 0;
 
-            if (isset($_POST["cve_producto"]) && $_POST["cve_producto"] != "") {
+            if (!empty($_POST["cve_producto"])) {
                 // Actualizar producto existente
                 $cve_producto = $_POST["cve_producto"];
                 $sql = "UPDATE producto SET nombre = ?, descripcion = ?, fec_mod = NOW() WHERE cve_producto = ? AND cve_usuario = ?";
@@ -55,7 +55,8 @@
                 $mensaje = $stmt->execute() ? "Producto actualizado correctamente." : "Error al actualizar el producto.";
             } else {
                 // Insertar nuevo producto
-                $sql = "INSERT INTO producto (cve_usuario, nombre, descripcion, fec_crea, fec_mod, activo, inventario, aplica_inventario) VALUES (?, ?, ?, NOW(), NOW(), ?, ?, ?)";
+                $sql = "INSERT INTO producto (cve_usuario, nombre, descripcion, fec_crea, fec_mod, activo, inventario, aplica_inventario) 
+                        VALUES (?, ?, ?, NOW(), NOW(), ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("issiii", $cve_usuario, $nombre, $descripcion, $activo, $inventario, $aplica_inventario);
                 $mensaje = $stmt->execute() ? "Producto agregado correctamente." : "Error al agregar el producto.";
@@ -99,7 +100,8 @@
                 FROM 
                     producto p
                 WHERE 
-                    p.cve_usuario = ?";
+                    p.cve_usuario = ?
+                ORDER BY p.cve_producto ASC"; // Asegurar orden incremental
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $cve_usuario);
