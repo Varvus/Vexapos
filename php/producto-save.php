@@ -29,5 +29,5 @@ if ($result->num_rows > 0) {
 }
 
 $stmt->execute();
-header("Location: productos.php?cve_usuario=" . $cve_usuario);
+header("Location: /admin-producto.php?cve_usuario=" . $cve_usuario);
 ?>
