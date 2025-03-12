@@ -36,6 +36,8 @@
             <hr>
 
             <?php
+            echo $conn;
+
             // Consulta SQL
             $sql = "SELECT 
                         p.cve_producto, 
