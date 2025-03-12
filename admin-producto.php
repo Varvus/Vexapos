@@ -25,8 +25,8 @@
                     <input type="text" id="wk_nombre" class="form-control" name="wk_nombre" required>
                 </div>
                 <div>
-                    <label for="wk_descripcion" class="form-label w-100">
-                        Descripción del Producto:
+                    <label for="wk_descripcion" class="form-label w-100">Descripción del Producto:
+                        
                         <textarea id="wk_descripcion" class="form-control" name="wk_descripcion" rows="3"></textarea>
                     </label>
                 </div>
@@ -93,7 +93,7 @@
                 echo "</tbody>
                     </table>";
             } else {
-                echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = $cve_usuario.</div>';
+                echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = ' + $cve_usuario. + '</div>';
             }
             ?>
 
