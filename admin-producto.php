@@ -48,7 +48,7 @@
         ?>
 
         <!-- Formulario para agregar / editar producto -->
-        <form method="POST" action="producto-save.php">
+        <form method="POST" action="php/producto-save.php">
             <input type="hidden" name="cve_usuario" value="<?= $cve_usuario ?>">
             <input type="hidden" name="cve_producto" value="<?= $edit_producto['cve_producto'] ?>">
 
