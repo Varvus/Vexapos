@@ -36,7 +36,7 @@
             <hr>
 
             <?php
-            echo $conn;
+            echo "connected";
 
             // Consulta SQL
             $sql = "SELECT 
