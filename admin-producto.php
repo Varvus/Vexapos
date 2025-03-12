@@ -95,7 +95,7 @@
                 echo "</tbody>
                     </table>";
             } else {
-                echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = ' + strval(($cve_usuario) + '</div>';
+                echo '<div class="alert alert-warning">No se encontraron productos para el usuario con cve_usuario = ' + strval($cve_usuario) + '</div>';
             }
             ?>
 
