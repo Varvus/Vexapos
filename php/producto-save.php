@@ -1,8 +1,8 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-include "php/connect.php";
+include "php/error-reporting.php";
+
+include __DIR__ . "/connect.php";
 
 $cve_usuario = $_POST["cve_usuario"];
 $nombre = $_POST["nombre"];
