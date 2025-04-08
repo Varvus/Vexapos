@@ -13,7 +13,7 @@
 
     <div class="container">
 
-        <?php include "verifica-usuario.php"; ?>
+        <?php include "php/verifica-usuario.php"; ?>
 
         <h2>Agregar / Editar Producto</h2>
         <hr>
