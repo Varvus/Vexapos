@@ -16,7 +16,7 @@ $cve_usuario = 1; // Usuario fijo, como pediste
 <body>
     <div class="container">
 
-        <?php include __DIR__ . "/admin-menu.php"; 
+        <?php include __DIR__ . "/admin-menu.php"; ?>
 
         <h2>Productos</h2>
         <hr>
