@@ -1,6 +1,5 @@
 <?php
 include __DIR__ . "/php/connect.php"; // Conexión a la base de datos
-include __DIR__ . "/admin-menu.php"; // Menú de administración
 include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
 
 $cve_usuario = 1; // Usuario fijo, como pediste
@@ -16,6 +15,8 @@ $cve_usuario = 1; // Usuario fijo, como pediste
 
 <body>
     <div class="container">
+
+        <?php include __DIR__ . "/admin-menu.php"; 
 
         <h2>Productos</h2>
         <hr>
