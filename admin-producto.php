@@ -1,5 +1,5 @@
 <?php
-include "/php/connect.php"; // Conexión a la base de datos
+include "php/connect.php"; // Conexión a la base de datos
 
 $cve_usuario = 1; // Usuario fijo, como pediste
 include "/php/verifica-usuario.php"; // Verificación de usuario
