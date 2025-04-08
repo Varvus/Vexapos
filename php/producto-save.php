@@ -9,14 +9,14 @@ print_r($_POST);
 echo "</pre>";
 exit;
 
-$cve_usuario = $_POST["cve_usuario"];
+$cve_usuario = 1; // fijo como pediste
 $nombre = $_POST["nombre"];
 $descripcion = $_POST["descripcion"];
 $activo = $_POST["activo"];
 $inventario = $_POST["inventario"];
 $aplica_inventario = $_POST["aplica_inventario"];
 
-// Obtener el siguiente cve_producto para ese usuario
+// Obtener siguiente cve_producto para ese usuario
 $sql = "SELECT COALESCE(MAX(cve_producto), 0) + 1 AS next_cve_producto FROM producto WHERE cve_usuario = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cve_usuario);
@@ -32,6 +32,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("iissiii", $cve_usuario, $cve_producto, $nombre, $descripcion, $activo, $inventario, $aplica_inventario);
 $stmt->execute();
 
-header("Location: /admin-producto.php");
+header("Location: /admin-producto.php"); // redirige al listado
 exit;
 ?>
