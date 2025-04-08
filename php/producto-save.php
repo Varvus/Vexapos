@@ -53,7 +53,7 @@ if (!empty($_POST["cve_producto"])) {
 
 // Ejecutar
 if ($stmt->execute()) {
-    header("Location: /admin-producto.php");
+    header("Location: /admin-producto.php?cve_usuario=" + $cve_usuario);
     exit;
 } else {
     echo "Error al ejecutar: " . $stmt->error;
