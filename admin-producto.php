@@ -1,8 +1,8 @@
 <?php
-include __DIR__ . "/php/connect.php"; // Conexión a la base de datos
+include "/php/connect.php"; // Conexión a la base de datos
 
 $cve_usuario = 1; // Usuario fijo, como pediste
-include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
+include "/php/verifica-usuario.php"; // Verificación de usuario
 
 
 ?>
@@ -17,7 +17,7 @@ include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
 <body>
     <div class="container">
 
-        <?php include __DIR__ . "/admin-menu.php"; ?>
+        <?php include "/admin-menu.php"; ?>
 
         <h2>Productos</h2>
         <hr>
