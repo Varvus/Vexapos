@@ -4,6 +4,11 @@ include "php/error-reporting.php";
 
 include __DIR__ . "/connect.php";
 
+echo "<pre>";
+print_r($_POST);
+echo "</pre>";
+exit;
+
 $cve_usuario = $_POST["cve_usuario"];
 $nombre = $_POST["nombre"];
 $descripcion = $_POST["descripcion"];
