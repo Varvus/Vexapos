@@ -1,55 +1,41 @@
 <?php
-
 include __DIR__ . "/php/error-reporting.php"; // Incluye los reportes de error
 include __DIR__ . "/connect.php"; // Conexión a la base de datos
 
-echo "<pre>";
-print_r($_POST); // Muestra el contenido de POST para depuración
-echo "</pre>";
-
-$cve_usuario = 1; // Como pediste, el usuario está fijo en 1
+$cve_usuario = $_POST["cve_usuario"];
+$cve_producto = $_POST["cve_producto"];
 $nombre = $_POST["nombre"];
 $descripcion = $_POST["descripcion"];
 $activo = $_POST["activo"];
 $inventario = $_POST["inventario"];
 $aplica_inventario = $_POST["aplica_inventario"];
 
-// Obtener siguiente cve_producto para ese usuario
-$sql = "SELECT COALESCE(MAX(cve_producto), 0) + 1 AS next_cve_producto FROM producto WHERE cve_usuario = ?";
-$stmt = $conn->prepare($sql);
-if ($stmt === false) {
-    echo "Error al preparar la consulta: " . $conn->error;
-    exit;
-}
+// Si el cve_producto está vacío, significa que es una inserción
+if (empty($cve_producto)) {
+    // Obtener el siguiente cve_producto para ese usuario
+    $sql = "SELECT COALESCE(MAX(cve_producto), 0) + 1 AS next_cve_producto FROM producto WHERE cve_usuario = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $cve_producto = $row['next_cve_producto'];
 
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$cve_producto = $row['next_cve_producto'];
-
-// Depuración: Verifica el cve_producto
-echo "cve_producto calculado: " . $cve_producto . "<br>";
-
-// Insertar nuevo producto
-$sql = "INSERT INTO producto (cve_usuario, cve_producto, nombre, descripcion, activo, inventario, aplica_inventario, fec_crea, fec_mod)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-$stmt = $conn->prepare($sql);
-
-if ($stmt === false) {
-    echo "Error al preparar la consulta de inserción: " . $conn->error;
-    exit;
-}
-
-$stmt->bind_param("iissiii", $cve_usuario, $cve_producto, $nombre, $descripcion, $activo, $inventario, $aplica_inventario);
-
-if ($stmt->execute()) {
-    echo "Producto insertado correctamente";
+    // Insertar nuevo producto
+    $sql = "INSERT INTO producto (cve_usuario, cve_producto, nombre, descripcion, activo, inventario, aplica_inventario, fec_crea, fec_mod)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iissiii", $cve_usuario, $cve_producto, $nombre, $descripcion, $activo, $inventario, $aplica_inventario);
+    $stmt->execute();
 } else {
-    echo "Error al ejecutar la consulta: " . $stmt->error;
+    // Si cve_producto no está vacío, es una actualización
+    $sql = "UPDATE producto SET nombre = ?, descripcion = ?, activo = ?, inventario = ?, aplica_inventario = ?, fec_mod = NOW() 
+            WHERE cve_usuario = ? AND cve_producto = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssiiiis", $nombre, $descripcion, $activo, $inventario, $aplica_inventario, $cve_usuario, $cve_producto);
+    $stmt->execute();
 }
 
-header("Location: /admin-producto.php"); // redirige al listado
+header("Location: /admin-producto.php"); // Redirige a la lista de productos
 exit;
-
 ?>

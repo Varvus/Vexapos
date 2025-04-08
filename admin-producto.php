@@ -1,61 +1,27 @@
+<?php
+include __DIR__ . "/php/connect.php"; // Conexión a la base de datos
+include __DIR__ . "/admin-menu.php"; // Menú de administración
+include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
+
+$cve_usuario = 1; // Usuario fijo, como pediste
+
+?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
-    <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin: Producto</title>
 </head>
 
 <body>
-    <?php include "php/connect.php"; ?>
-    <?php include "admin-menu.php"; ?>
-
     <div class="container">
-        <h2>Agregar Producto</h2>
-        <hr>
-
-        <form method="POST" action="php/producto-save.php">
-            <input type="hidden" name="cve_usuario" value="1"> 
-
-            <div>
-                <label class="form-label">*Nombre de Producto</label>
-                <input type="text" class="form-control" name="nombre" required>
-            </div>
-
-            <div>
-                <label class="form-label">Descripción del Producto</label>
-                <textarea class="form-control" name="descripcion" rows="3"></textarea>
-            </div>
-
-            <div>
-                <label class="form-label">Activo</label>
-                <select class="form-control" name="activo">
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="form-label">Inventario</label>
-                <input type="number" class="form-control" name="inventario" value="0">
-            </div>
-
-            <div>
-                <label class="form-label">Aplica Inventario</label>
-                <select class="form-control" name="aplica_inventario">
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Agregar Producto</button>
-        </form>
 
         <h2>Productos</h2>
         <hr>
 
         <?php
-        $cve_usuario = 1;
+        // Obtener la lista de productos
         $sql = "SELECT * FROM producto WHERE cve_usuario = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $cve_usuario);
@@ -71,6 +37,7 @@
                             <th>Descripción</th>
                             <th>Activo</th>
                             <th>Inventario</th>
+                            <th>Opciones</th>
                         </tr>
                     </thead>
                     <tbody>";
@@ -78,10 +45,13 @@
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>{$row['cve_producto']}</td>
-                        <td>{$row['nombre']}</td>
+                        <td><a href='?edit={$row['cve_producto']}' class='btn btn-warning'>Editar</a></td>
                         <td>{$row['descripcion']}</td>
                         <td>" . ($row['activo'] ? 'Sí' : 'No') . "</td>
                         <td>{$row['inventario']}</td>
+                        <td>
+                            <a href='?edit={$row['cve_producto']}' class='btn btn-warning'>Editar</a>
+                        </td>
                     </tr>";
             }
 
@@ -89,14 +59,10 @@
         } else {
             echo '<div class="alert alert-warning">No se encontraron productos para este usuario.</div>';
         }
-
-        $stmt->close();
         ?>
 
-        <?php include "footer.php"; ?>
-        <?php include "php/connect-close.php"; ?>
+        <?php include __DIR__ . "/footer.php"; // Pie de página ?>
     </div>
 </body>
 
 </html>
-
