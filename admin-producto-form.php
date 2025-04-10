@@ -1,18 +1,17 @@
 <?php
 include __DIR__ . "/php/connect.php"; // Conexión a la base de datos
 include __DIR__ . "/admin-menu.php"; // Menú de administración
-include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
-
 $cve_usuario = 1; // Usuario fijo, como pediste
+include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
 
 // Verificar si se pasa un cve_producto para edición
 $edit_mode = false;
 $edit_producto = [
-    "cve_producto" => "", 
-    "nombre" => "", 
-    "descripcion" => "", 
-    "activo" => 1, 
-    "inventario" => 0, 
+    "cve_producto" => "",
+    "nombre" => "",
+    "descripcion" => "",
+    "activo" => 1,
+    "inventario" => 0,
     "aplica_inventario" => 0
 ];
 
@@ -57,7 +56,8 @@ if (isset($_GET["edit"])) {
 
             <div>
                 <label class="form-label">Descripción del Producto</label>
-                <textarea class="form-control" name="descripcion" rows="3"><?= $edit_producto['descripcion'] ?></textarea>
+                <textarea class="form-control" name="descripcion"
+                    rows="3"><?= $edit_producto['descripcion'] ?></textarea>
             </div>
 
             <div>
@@ -81,7 +81,8 @@ if (isset($_GET["edit"])) {
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary"><?= $edit_mode ? 'Actualizar Producto' : 'Agregar Producto' ?></button>
+            <button type="submit"
+                class="btn btn-primary"><?= $edit_mode ? 'Actualizar Producto' : 'Agregar Producto' ?></button>
         </form>
 
         <?php include __DIR__ . "/footer.php"; // Pie de página ?>
