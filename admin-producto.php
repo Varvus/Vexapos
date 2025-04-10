@@ -20,7 +20,8 @@ include "php/verifica-usuario.php";
     <div class="container">
 
         <h2 class="d-inline-block">Productos</h2>
-        <a class="d-inline-block badge badge-primary" href="admin-producto-form.php?cve_usuario=<?php $cve_usuario ?>">+
+        <a class="d-inline-block badge badge text-bg-primary"
+            href="admin-producto-form.php?cve_usuario=<?php $cve_usuario ?>">+
             Agregar</a>
         <hr>
 
