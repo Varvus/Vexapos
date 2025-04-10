@@ -15,7 +15,7 @@ $cve_usuario = 1;
 <body>
     <div class="container">
 
-        <?php include "/admin-menu.php"; ?>
+        <?php include "admin-menu.php"; ?>
 
         <h2>Productos</h2>
         <hr>
