@@ -19,6 +19,11 @@ include "php/verifica-usuario.php";
 
     <div class="container">
 
+        <h2>Agregar Producto</h2>
+        <hr>
+
+        <a href="admin-producto-form.php?cve_usuario=<?php $cve_usuario ?>">+ Agregar</a>
+
         <h2>Productos</h2>
         <hr>
 
