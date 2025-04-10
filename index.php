@@ -3,7 +3,7 @@
 
 <head>
 
-    <?php include "initials.php"; ?>
+    <?php include "/initials.php"; ?>
     <title></title>
 
 </head>
