@@ -1,8 +1,8 @@
 <?php
-include __DIR__ . "/php/connect.php"; // Conexión a la base de datos
-include __DIR__ . "/admin-menu.php"; // Menú de administración
+include "php/connect.php"; // Conexión a la base de datos
+include "admin-menu.php"; // Menú de administración
 $cve_usuario = 1; // Usuario fijo, como pediste
-include __DIR__ . "/php/verifica-usuario.php"; // Verificación de usuario
+include "php/verifica-usuario.php"; // Verificación de usuario
 
 // Verificar si se pasa un cve_producto para edición
 $edit_mode = false;
