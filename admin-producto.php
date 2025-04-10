@@ -10,7 +10,7 @@ include "php/verifica-usuario.php";
 
 <head>
 
-    <?php include "/initials.php"; ?>
+    <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin: Producto</title>
 
 </head>
