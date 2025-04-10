@@ -46,7 +46,7 @@ include "php/verifica-usuario.php";
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>{$row['cve_producto']}</td>
-                        <td><a href='?edit={$row['cve_producto']}' class='btn btn-warning'>Editar</a></td>
+                        <td><a href='?edit={$row['cve_producto']}' class='btn btn-warning'>" . $row['nombre'] . "</a></td>
                         <td>{$row['descripcion']}</td>
                         <td>" . ($row['activo'] ? 'Sí' : 'No') . "</td>
                         <td>{$row['inventario']}</td>
