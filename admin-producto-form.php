@@ -1,8 +1,6 @@
 <?php
-include "php/connect.php"; // Conexión a la base de datos
-include "admin-menu.php"; // Menú de administración
-$cve_usuario = 1; // Usuario fijo, como pediste
-include "php/verifica-usuario.php"; // Verificación de usuario
+include "php/connect.php";
+include "php/verifica-usuario.php";
 
 // Verificar si se pasa un cve_producto para edición
 $edit_mode = false;
@@ -35,10 +33,15 @@ if (isset($_GET["edit"])) {
 <html>
 
 <head>
+
+    <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin: Agregar / Editar Producto</title>
+
 </head>
 
 <body>
+    <?php include "admin-menu.php"; ?>
+
     <div class="container">
 
         <h2><?= $edit_mode ? 'Editar Producto' : 'Agregar Producto' ?></h2>

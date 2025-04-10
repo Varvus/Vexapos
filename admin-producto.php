@@ -14,9 +14,10 @@ include "php/verifica-usuario.php";
 </head>
 
 <body>
-    <div class="container">
 
-        <?php include "admin-menu.php"; ?>
+    <?php include "admin-menu.php"; ?>
+
+    <div class="container">
 
         <h2>Productos</h2>
         <hr>
