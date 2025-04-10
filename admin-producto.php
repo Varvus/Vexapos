@@ -2,14 +2,17 @@
 include "php/connect.php"; // Conexión a la base de datos
 
 $cve_usuario = 1;
-//include "php/verifica-usuario.php"; 
+include "php/verifica-usuario.php";
 ?>
 
 <!DOCTYPE html>
 <html>
 
 <head>
+
+    <?php include "initials.php"; 
     <title>VEXAPOS: Admin: Producto</title>
+
 </head>
 
 <body>
