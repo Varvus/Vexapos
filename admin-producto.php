@@ -1,7 +1,5 @@
 <?php
 include "php/connect.php"; // Conexión a la base de datos
-
-$cve_usuario = 1;
 include "php/verifica-usuario.php";
 ?>
 
