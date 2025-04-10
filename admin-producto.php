@@ -45,8 +45,8 @@ include "php/verifica-usuario.php";
 
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
-                        <td>{$row['cve_producto']}</td>
-                        <td><a href='?edit={$row['cve_producto']}' class='btn btn-warning'>" . $row['nombre'] . "</a></td>
+                        <td><a href='?edit={$row['cve_producto']}' class='btn btn-warning'>{$row['cve_producto']}</a></td>
+                        <td>" . $row['nombre'] . "</td>
                         <td>{$row['descripcion']}</td>
                         <td>" . ($row['activo'] ? 'Sí' : 'No') . "</td>
                         <td>{$row['inventario']}</td>
@@ -63,7 +63,6 @@ include "php/verifica-usuario.php";
         ?>
 
         <?php include "/footer.php"; // Pie de página ?>
-
 
     </div>
 </body>
