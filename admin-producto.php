@@ -48,12 +48,21 @@ include "php/verifica-usuario.php";
                     <tbody>";
 
             while ($row = $result->fetch_assoc()) {
+                $imagen_url = $_SERVER['DOCUMENT_ROOT'] . "/img/producto/" . $row['imagen'];  // Ruta completa de la imagen
+        
+                // Verificar si el archivo de imagen existe
+                if (file_exists($imagen_url) && $row['imagen'] != "") {
+                    $imagen_tag = "<img src='/img/producto/" . $row['imagen'] . "' alt='{$row['nombre']}' style='max-width: 100px;'>";
+                } else {
+                    $imagen_tag = "";  // No mostrar nada si la imagen no existe
+                }
+
                 echo "<tr>
                         <td>{$row['cve_producto']}</td>
                         <td>{$row['nombre']}</td>
                         <td>{$row['descripcion']}</td>
                         <td>$" . number_format($row['precio'], 2) . "</td>
-                        <td>{$row['imagen']}</td>
+                        <td>{$imagen_tag}</td> <!-- Mostrar imagen si existe -->
                         <td>" . ($row['activo'] ? 'Sí' : 'No') . "</td>
                         <td>{$row['inventario']}</td>
                         <td>
