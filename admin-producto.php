@@ -7,10 +7,8 @@ include "php/verifica-usuario.php";
 <html>
 
 <head>
-
     <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin: Producto</title>
-
 </head>
 
 <body>
@@ -21,7 +19,7 @@ include "php/verifica-usuario.php";
 
         <h2 class="d-inline-block">Productos</h2>
         <a class="d-inline-block badge badge text-bg-primary text-decoration-none"
-            href="admin-producto-form.php?cve_usuario=<?php $cve_usuario ?>">
+            href="admin-producto-form.php?cve_usuario=<?= $cve_usuario ?>">
             Agregar</a>
         <hr>
 
@@ -40,6 +38,8 @@ include "php/verifica-usuario.php";
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Imagen</th>
                             <th>Activo</th>
                             <th>Inventario</th>
                             <th>Opciones</th>
@@ -50,8 +50,10 @@ include "php/verifica-usuario.php";
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>{$row['cve_producto']}</td>
-                        <td>" . $row['nombre'] . "</td>
+                        <td>{$row['nombre']}</td>
                         <td>{$row['descripcion']}</td>
+                        <td>$" . number_format($row['precio'], 2) . "</td>
+                        <td>{$row['imagen']}</td>
                         <td>" . ($row['activo'] ? 'Sí' : 'No') . "</td>
                         <td>{$row['inventario']}</td>
                         <td>
@@ -66,9 +68,9 @@ include "php/verifica-usuario.php";
         }
         ?>
 
-        <?php include "/footer.php"; // Pie de página ?>
-
+        <?php include __DIR__ . "/footer.php"; ?>
     </div>
+
 </body>
 
 </html>

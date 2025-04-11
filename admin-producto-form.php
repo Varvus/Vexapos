@@ -8,6 +8,8 @@ $edit_producto = [
     "cve_producto" => "",
     "nombre" => "",
     "descripcion" => "",
+    "precio" => "",
+    "imagen" => "",
     "activo" => 1,
     "inventario" => 0,
     "aplica_inventario" => 0
@@ -33,10 +35,8 @@ if (isset($_GET["edit"])) {
 <html>
 
 <head>
-
     <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin: Agregar / Editar Producto</title>
-
 </head>
 
 <body>
@@ -48,9 +48,10 @@ if (isset($_GET["edit"])) {
         <hr>
 
         <!-- Formulario para agregar / editar producto -->
-        <form method="POST" action="php/producto-save.php">
+        <form method="POST" action="php/producto-save.php" enctype="multipart/form-data">
             <input type="hidden" name="cve_usuario" value="<?= $cve_usuario ?>">
             <input type="hidden" name="cve_producto" value="<?= $edit_producto['cve_producto'] ?>">
+            <input type="hidden" name="imagen" value="<?= $edit_producto['imagen'] ?>">
 
             <div>
                 <label class="form-label">*Nombre de Producto</label>
@@ -61,6 +62,24 @@ if (isset($_GET["edit"])) {
                 <label class="form-label">Descripción del Producto</label>
                 <textarea class="form-control" name="descripcion"
                     rows="3"><?= $edit_producto['descripcion'] ?></textarea>
+            </div>
+
+            <div>
+                <label class="form-label">Precio</label>
+                <input type="number" step="0.01" class="form-control" name="precio"
+                    value="<?= $edit_producto['precio'] ?>" required>
+            </div>
+
+            <div>
+                <label class="form-label">Imagen</label>
+                <input type="file" class="form-control" name="imagen_archivo">
+                <?php if (!empty($edit_producto['imagen'])): ?>
+                    <div class="mt-2">
+                        <small>Imagen actual:</small><br>
+                        <img src="img/producto/<?= $edit_producto['imagen'] ?>" alt="Imagen actual"
+                            style="max-height: 150px;">
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div>
@@ -84,11 +103,12 @@ if (isset($_GET["edit"])) {
                 </select>
             </div>
 
-            <button type="submit"
-                class="btn btn-primary"><?= $edit_mode ? 'Actualizar Producto' : 'Agregar Producto' ?></button>
+            <button type="submit" class="btn btn-primary">
+                <?= $edit_mode ? 'Actualizar Producto' : 'Agregar Producto' ?>
+            </button>
         </form>
 
-        <?php include __DIR__ . "/footer.php"; // Pie de página ?>
+        <?php include __DIR__ . "/footer.php"; ?>
     </div>
 </body>
 
