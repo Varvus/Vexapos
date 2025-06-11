@@ -1,6 +1,6 @@
 <?php
 // Primero intentar obtener el usuario de alguna fuente disponible
-if (isset($cve_usuario)) {
+/*if (isset($cve_usuario)) {
     // Ya está definido, no hacer nada
 } elseif (isset($_POST['cve_usuario'])) {
     $cve_usuario = intval($_POST['cve_usuario']);
@@ -8,7 +8,9 @@ if (isset($cve_usuario)) {
     $cve_usuario = intval($_GET['cve_usuario']);
 } else {
     $cve_usuario = 0; // No definido
-}
+}*/
+
+$cve_usuario = 1;
 
 // Validar que sea válido
 if ($cve_usuario <= 0) {
