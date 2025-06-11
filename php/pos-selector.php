@@ -163,7 +163,7 @@ while ($row = $result->fetch_assoc()) {
             document.getElementById("efectivo").value = "";
             renderPedido();
         } else {
-            alert("Error al guardar el pedido." + (data.mensaje || "Error desconocido")););
+            alert("Error al guardar el pedido." + (data.mensaje || "Error desconocido"));
         }
     });
 </script>
