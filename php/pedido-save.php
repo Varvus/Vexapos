@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 header('Content-Type: application/json');
 
 include __DIR__ . "/connect.php";
@@ -36,7 +39,7 @@ $cve_pedido = $row['nuevo'];
 $sql = "INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total, cve_cliente)
         VALUES (?, ?, 1, ?, ?, 0.00, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("issssi", $cve_usuario, $cve_pedido, $fecha, $fecha, $cve_cliente);
+$stmt->bind_param("iissi", $cve_usuario, $cve_pedido, $fecha, $fecha, $cve_cliente);
 $stmt->execute();
 
 $total_pedido = 0.00;
