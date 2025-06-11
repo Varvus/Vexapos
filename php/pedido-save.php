@@ -1,6 +1,17 @@
 <?php
+header('Content-Type: application/json');
+
 include __DIR__ . "/connection.php";
 include __DIR__ . "/verifica-usuario.php";
+
+// Leer JSON desde el cuerpo de la petición
+$input = json_decode(file_get_contents("php://input"), true);
+
+// Verifica que se recibió correctamente
+if (!$input || !isset($input['cve_usuario']) || !isset($input['productos'])) {
+    echo json_encode(["success" => false, "mensaje" => "Datos incompletos o inválidos"]);
+    exit;
+}
 
 $cve_usuario = $_POST['cve_usuario'];
 $cve_cliente = $_POST['cve_cliente'];
@@ -57,4 +68,11 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("dsii", $total_pedido, $fecha, $cve_usuario, $cve_pedido);
 $stmt->execute();
 
+if (!$stmt) {
+    echo json_encode(["success" => false, "mensaje" => "Error en prepare: " . $conn->error]);
+    exit;
+}
+
 echo json_encode(["success" => true, "cve_pedido" => $cve_pedido]);
+
+
