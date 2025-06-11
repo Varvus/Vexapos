@@ -1,84 +1,66 @@
 <?php
 include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
-
 header("Content-Type: application/json");
 
-// Validar datos recibidos
-if (!isset($_POST["productos"]) || !is_array($_POST["productos"]) || count($_POST["productos"]) === 0) {
+// Muestra errores en desarrollo:
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+try {
+    $json = file_get_contents("php://input");
+    $data = json_decode($json, true);
+
+    if (!isset($data['productos'], $data['total']) || empty($data['productos'])) {
+        throw new Exception("Datos incompletos.");
+    }
+
+    $productos = $data['productos'];
+    $total = $data['total'];
+    $fec = date("Y-m-d H:i:s");
+
+    // Obtener nuevo cve_pedido para el usuario
+    $stmt = $conn->prepare("SELECT IFNULL(MAX(cve_pedido), 0) + 1 FROM pedido WHERE cve_usuario = ?");
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $stmt->bind_result($cve_pedido);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Insertar pedido
+    $cve_estatus = 1; // Ejemplo: 1 = Completado
+    $cve_cliente = null;
+    $stmt = $conn->prepare("INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total, cve_cliente)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("iiissdi", $cve_usuario, $cve_pedido, $cve_estatus, $fec, $fec, $total, $cve_cliente);
+    if (!$stmt->execute()) {
+        throw new Exception("Error al insertar el pedido: " . $stmt->error);
+    }
+    $stmt->close();
+
+    // Insertar detalle
+    $stmt = $conn->prepare("INSERT INTO pedido_det (cve_usuario, cve_pedido, cve_producto, cantidad, fec_crea, fec_mod, total)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)");
+    foreach ($productos as $p) {
+        $cve_producto = $p["id"];
+        $cantidad = $p["cantidad"];
+        $precio = $p["precio"];
+        $total_producto = $precio * $cantidad;
+        $stmt->bind_param("iiidssd", $cve_usuario, $cve_pedido, $cve_producto, $cantidad, $fec, $fec, $total_producto);
+        if (!$stmt->execute()) {
+            throw new Exception("Error al insertar detalle: " . $stmt->error);
+        }
+    }
+    $stmt->close();
+
+    echo json_encode([
+        "success" => true,
+        "cve_pedido" => $cve_pedido
+    ]);
+
+} catch (Exception $e) {
     echo json_encode([
         "success" => false,
-        "message" => "No se recibieron productos válidos."
+        "mensaje" => $e->getMessage()
     ]);
-    exit;
 }
-
-// Preparar datos
-$productos = $_POST["productos"];
-$total = 0;
-foreach ($productos as $item) {
-    if (!isset($item["cve_producto"], $item["cantidad"])) {
-        continue;
-    }
-
-    // Consultar precio actual del producto
-    $stmt = $conn->prepare("SELECT precio FROM producto WHERE cve_usuario = ? AND cve_producto = ?");
-    $stmt->bind_param("ii", $cve_usuario, $item["cve_producto"]);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $producto = $result->fetch_assoc();
-
-    if ($producto) {
-        $total += $producto["precio"] * $item["cantidad"];
-    }
-}
-
-// Obtener nuevo cve_pedido
-$sql = "SELECT COALESCE(MAX(cve_pedido), 0) + 1 AS next_pedido FROM pedido WHERE cve_usuario = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$cve_pedido = $row["next_pedido"];
-
-// Insertar pedido
-$sql = "INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total)
-        VALUES (?, ?, 1, NOW(), NOW(), ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iid", $cve_usuario, $cve_pedido, $total);
-$stmt->execute();
-
-// Insertar productos en pedido_det
-$sql_det = "INSERT INTO pedido_det (cve_usuario, cve_pedido, cve_producto, cantidad, fec_crea, fec_mod, total)
-            VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
-$stmt_det = $conn->prepare($sql_det);
-
-foreach ($productos as $item) {
-    $cve_producto = $item["cve_producto"];
-    $cantidad = $item["cantidad"];
-
-    // Obtener precio actual
-    $stmt = $conn->prepare("SELECT precio FROM producto WHERE cve_usuario = ? AND cve_producto = ?");
-    $stmt->bind_param("ii", $cve_usuario, $cve_producto);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $producto = $result->fetch_assoc();
-
-    if ($producto) {
-        $precio_unitario = $producto["precio"];
-        $total_item = $precio_unitario * $cantidad;
-
-        $stmt_det->bind_param("iiiid", $cve_usuario, $cve_pedido, $cve_producto, $cantidad, $total_item);
-        $stmt_det->execute();
-    }
-}
-
-// Respuesta JSON
-echo json_encode([
-    "success" => true,
-    "cve_pedido" => $cve_pedido,
-    "total" => $total
-]);
-exit;
-?>
