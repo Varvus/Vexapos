@@ -11,6 +11,8 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     exit;
 });
 
+$cve_usuario = $input['cve_usuario']; // ✅ Ya disponible antes del include
+
 include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
