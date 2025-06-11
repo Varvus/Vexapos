@@ -68,11 +68,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("dsii", $total_pedido, $fecha, $cve_usuario, $cve_pedido);
 $stmt->execute();
 
-if (!$stmt) {
-    echo json_encode(["success" => false, "mensaje" => "Error en prepare: " . $conn->error]);
-    exit;
-}
-
 echo json_encode(["success" => true, "cve_pedido" => $cve_pedido]);
 
 
