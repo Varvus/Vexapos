@@ -151,6 +151,7 @@ while ($row = $result->fetch_assoc()) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 cve_usuario: <?= $cve_usuario ?>,
+                cve_cliente: 1, /*Temporal*/
                 productos: pedido,
                 total: total
             })
