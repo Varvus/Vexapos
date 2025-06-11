@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-include __DIR__ . "/connection.php";
+include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
 // Validar que los datos existen
