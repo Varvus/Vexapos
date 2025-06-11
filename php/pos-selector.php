@@ -1,79 +1,107 @@
-<?php
-header('Content-Type: application/json');
+<script>
+    let pedido = [];
 
-include __DIR__ . "/connect.php";
-include __DIR__ . "/verifica-usuario.php";
+    function renderPedido() {
+        const tbody = document.getElementById("detalle");
+        const tabla = document.getElementById("tabla-pedido");
+        tbody.innerHTML = "";
 
-// Verificar que se recibieron datos necesarios por POST
-if (
-    !isset($_POST['cve_usuario']) ||
-    !isset($_POST['productos']) ||
-    !is_array($_POST['productos'])
-) {
-    echo json_encode(["success" => false, "mensaje" => "Datos incompletos o inválidos"]);
-    exit;
-}
+        if (pedido.length === 0) {
+            tabla.classList.add("d-none");
+            document.getElementById("total").textContent = "0.00";
+            document.getElementById("cambio").textContent = "$0.00";
+            return;
+        }
 
-$cve_usuario = (int) $_POST['cve_usuario'];
-$cve_cliente = isset($_POST['cve_cliente']) ? (int) $_POST['cve_cliente'] : 1;
-$productos = $_POST['productos'];  // Esperamos un array con los productos
+        let total = 0;
+        pedido.forEach((item, index) => {
+            const subtotal = item.cantidad * item.precio;
+            total += subtotal;
 
-$fecha = date('Y-m-d H:i:s');
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>$${item.precio.toFixed(2)}</td>
+                <td>$${subtotal.toFixed(2)}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="eliminar(${index})">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-// Obtener nuevo cve_pedido para este usuario
-$sql = "SELECT IFNULL(MAX(cve_pedido), 0) + 1 AS nuevo FROM pedido WHERE cve_usuario = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$cve_pedido = $row['nuevo'];
+        tabla.classList.remove("d-none");
+        document.getElementById("total").textContent = total.toFixed(2);
 
-// Insertar el pedido (inicial con total 0)
-$sql = "INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total, cve_cliente)
-        VALUES (?, ?, 1, ?, ?, 0.00, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("isssi", $cve_usuario, $cve_pedido, $fecha, $fecha, $cve_cliente);
-$stmt->execute();
-
-$total_pedido = 0.00;
-
-// Insertar cada producto en pedido_det
-foreach ($productos as $prod) {
-    // Esperamos que cada producto tenga cve_producto y cantidad
-    if (!isset($prod['cve_producto']) || !isset($prod['cantidad'])) {
-        continue;  // Ignorar si faltan datos
+        const efectivo = parseFloat(document.getElementById("efectivo").value);
+        if (!isNaN(efectivo)) {
+            const cambio = efectivo - total;
+            document.getElementById("cambio").textContent = cambio >= 0 ? "$" + cambio.toFixed(2) : "$0.00";
+        }
     }
 
-    $cve_producto = (int) $prod['cve_producto'];
-    $cantidad = (int) $prod['cantidad'];
+    function eliminar(index) {
+        pedido.splice(index, 1);
+        renderPedido();
+    }
 
-    // Obtener precio actual del producto
-    $sql = "SELECT precio FROM producto WHERE cve_usuario = ? AND cve_producto = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $cve_usuario, $cve_producto);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$row = $result->fetch_assoc())
-        continue;
+    document.getElementById("btn-agregar").addEventListener("click", () => {
+        const select = document.getElementById("producto");
+        const cantidad = parseInt(document.getElementById("cantidad").value);
+        const id = parseInt(select.value);
+        const nombre = select.options[select.selectedIndex].text;
+        const precio = parseFloat(select.options[select.selectedIndex].dataset.precio);
 
-    $precio = (float) $row['precio'];
-    $total = round($precio * $cantidad, 2);
+        if (cantidad > 0) {
+            pedido.push({ cve_producto: id, nombre, precio, cantidad });
+            renderPedido();
+        }
+    });
 
-    // Insertar detalle
-    $sql = "INSERT INTO pedido_det (cve_usuario, cve_pedido, cve_producto, cantidad, fec_crea, fec_mod, total)
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iiisssd", $cve_usuario, $cve_pedido, $cve_producto, $cantidad, $fecha, $fecha, $total);
-    $stmt->execute();
+    document.getElementById("efectivo").addEventListener("input", () => {
+        renderPedido();
+    });
 
-    $total_pedido += $total;
-}
+    document.getElementById("btn-cobrar").addEventListener("click", async () => {
+        if (pedido.length === 0) return;
 
-// Actualizar total en pedido
-$sql = "UPDATE pedido SET total = ?, fec_mod = ? WHERE cve_usuario = ? AND cve_pedido = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("dsii", $total_pedido, $fecha, $cve_usuario, $cve_pedido);
-$stmt->execute();
+        const total = pedido.reduce((sum, p) => sum + p.precio * p.cantidad, 0);
+        const efectivo = parseFloat(document.getElementById("efectivo").value || "0");
 
-echo json_encode(["success" => true, "cve_pedido" => $cve_pedido]);
+        if (efectivo < total) {
+            alert("El efectivo no es suficiente.");
+            return;
+        }
+
+        const btnCobrar = document.getElementById("btn-cobrar");
+        btnCobrar.disabled = true;
+
+        const formData = new FormData();
+        formData.append("cve_usuario", <?= $cve_usuario ?>);
+        formData.append("cve_cliente", 1); // Temporal
+        formData.append("productos", JSON.stringify(pedido));
+        formData.append("total", total.toFixed(2));
+
+        try {
+            const res = await fetch("php/pedido-save.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Venta registrada. Pedido #" + data.cve_pedido);
+                pedido = [];
+                document.getElementById("efectivo").value = "";
+                renderPedido();
+            } else {
+                alert("Error al guardar el pedido. " + (data.mensaje || "Error desconocido"));
+            }
+        } catch (error) {
+            alert("Error en la comunicación con el servidor.");
+            console.error(error);
+        } finally {
+            btnCobrar.disabled = false;
+        }
+    });
+</script>
