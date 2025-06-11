@@ -7,14 +7,14 @@ include __DIR__ . "/verifica-usuario.php";
 // Leer JSON desde el cuerpo de la petición
 $input = json_decode(file_get_contents("php://input"), true);
 
-// Verifica que se recibió correctamente
 if (!$input || !isset($input['cve_usuario']) || !isset($input['productos'])) {
     echo json_encode(["success" => false, "mensaje" => "Datos incompletos o inválidos"]);
     exit;
 }
 
+// ✅ Corrección aquí
 $cve_usuario = $input['cve_usuario'];
-$cve_cliente = $input['cve_cliente'];
+$cve_cliente = $input['cve_cliente'] ?? 1;
 $productos = $input['productos'];
 $fecha = date('Y-m-d H:i:s');
 
