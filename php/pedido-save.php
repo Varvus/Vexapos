@@ -2,121 +2,83 @@
 include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
-// Obtener productos
-$sql = "SELECT cve_producto, nombre, precio FROM producto WHERE cve_usuario = ? AND activo = 1 ORDER BY nombre";
+header("Content-Type: application/json");
+
+// Validar datos recibidos
+if (!isset($_POST["productos"]) || !is_array($_POST["productos"]) || count($_POST["productos"]) === 0) {
+    echo json_encode([
+        "success" => false,
+        "message" => "No se recibieron productos válidos."
+    ]);
+    exit;
+}
+
+// Preparar datos
+$productos = $_POST["productos"];
+$total = 0;
+foreach ($productos as $item) {
+    if (!isset($item["cve_producto"], $item["cantidad"])) {
+        continue;
+    }
+
+    // Consultar precio actual del producto
+    $stmt = $conn->prepare("SELECT precio FROM producto WHERE cve_usuario = ? AND cve_producto = ?");
+    $stmt->bind_param("ii", $cve_usuario, $item["cve_producto"]);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $producto = $result->fetch_assoc();
+
+    if ($producto) {
+        $total += $producto["precio"] * $item["cantidad"];
+    }
+}
+
+// Obtener nuevo cve_pedido
+$sql = "SELECT COALESCE(MAX(cve_pedido), 0) + 1 AS next_pedido FROM pedido WHERE cve_usuario = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cve_usuario);
 $stmt->execute();
 $result = $stmt->get_result();
-$productos = [];
-while ($row = $result->fetch_assoc()) {
-    $productos[] = $row;
+$row = $result->fetch_assoc();
+$cve_pedido = $row["next_pedido"];
+
+// Insertar pedido
+$sql = "INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total)
+        VALUES (?, ?, 1, NOW(), NOW(), ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("iid", $cve_usuario, $cve_pedido, $total);
+$stmt->execute();
+
+// Insertar productos en pedido_det
+$sql_det = "INSERT INTO pedido_det (cve_usuario, cve_pedido, cve_producto, cantidad, fec_crea, fec_mod, total)
+            VALUES (?, ?, ?, ?, NOW(), NOW(), ?)";
+$stmt_det = $conn->prepare($sql_det);
+
+foreach ($productos as $item) {
+    $cve_producto = $item["cve_producto"];
+    $cantidad = $item["cantidad"];
+
+    // Obtener precio actual
+    $stmt = $conn->prepare("SELECT precio FROM producto WHERE cve_usuario = ? AND cve_producto = ?");
+    $stmt->bind_param("ii", $cve_usuario, $cve_producto);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $producto = $result->fetch_assoc();
+
+    if ($producto) {
+        $precio_unitario = $producto["precio"];
+        $total_item = $precio_unitario * $cantidad;
+
+        $stmt_det->bind_param("iiiid", $cve_usuario, $cve_pedido, $cve_producto, $cantidad, $total_item);
+        $stmt_det->execute();
+    }
 }
+
+// Respuesta JSON
+echo json_encode([
+    "success" => true,
+    "cve_pedido" => $cve_pedido,
+    "total" => $total
+]);
+exit;
 ?>
-
-<div class="card p-3 mb-3">
-    <h5>Venta rápida</h5>
-    <div class="row g-2 align-items-end">
-        <div class="col-md-5">
-            <label>Producto</label>
-            <select class="form-select" id="producto">
-                <?php foreach ($productos as $p): ?>
-                    <option value="<?= $p['cve_producto'] ?>" data-precio="<?= $p['precio'] ?>">
-                        <?= htmlspecialchars($p['nombre']) ?> ($<?= number_format($p['precio'], 2) ?>)
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label>Cantidad</label>
-            <input type="number" id="cantidad" class="form-control" value="1" min="1">
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
-        </div>
-    </div>
-
-    <hr>
-
-    <div id="tabla-pedido" class="table-responsive d-none">
-        <table class="table table-bordered mt-3">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                    <th>Total</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="detalle"></tbody>
-        </table>
-
-        <div class="mb-2">
-            <strong>Total: $<span id="total">0.00</span></strong>
-        </div>
-
-        <div class="row g-2 align-items-end mb-2">
-            <div class="col-md-4">
-                <label>Efectivo recibido</label>
-                <input type="number" id="efectivo" class="form-control" min="0" step="0.01">
-            </div>
-            <div class="col-md-4">
-                <label>Cambio</label>
-                <div class="form-control bg-light" id="cambio">$0.00</div>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-success w-100" id="btn-cobrar">Cobrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    let pedido = [];
-
-    function renderPedido() {
-        const tbody = document.getElementById("detalle");
-        const tabla = document.getElementById("tabla-pedido");
-        tbody.innerHTML = "";
-
-        if (pedido.length === 0) {
-            tabla.classList.add("d-none");
-            document.getElementById("total").textContent = "0.00";
-            document.getElementById("cambio").textContent = "$0.00";
-            return;
-        }
-
-        let total = 0;
-        pedido.forEach((item, index) => {
-            const subtotal = item.cantidad * item.precio;
-            total += subtotal;
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-            <td>${item.nombre}</td>
-            <td>${item.cantidad}</td>
-            <td>$${item.precio.toFixed(2)}</td>
-            <td>$${subtotal.toFixed(2)}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="eliminar(${index})">X</button></td>
-        `;
-            tbody.appendChild(tr);
-        });
-
-        tabla.classList.remove("d-none");
-        document.getElementById("total").textContent = total.toFixed(2);
-
-        const efectivo = parseFloat(document.getElementById("efectivo").value);
-        if (!isNaN(efectivo)) {
-            const cambio = efectivo - total;
-            document.getElementById("cambio").textContent = cambio >= 0 ? "$" + cambio.toFixed(2) : "$0.00";
-        }
-    }
-
-    function eliminar(index) {
-        pedido.splice(index, 1);
-        renderPedido();
-    }
-
-    document.getElementById("btn-agregar").addEventListener("click", () => {
-        const select = document.getElementById("produc
