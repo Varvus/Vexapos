@@ -11,7 +11,7 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     exit;
 });
 
-include __DIR__ . "/connection.php";
+include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
 // Leer JSON desde el cuerpo de la petición
