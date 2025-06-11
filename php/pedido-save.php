@@ -1,6 +1,16 @@
 <?php
 header('Content-Type: application/json');
 
+set_exception_handler(function ($e) {
+    echo json_encode(["success" => false, "mensaje" => "Excepción: " . $e->getMessage()]);
+    exit;
+});
+
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    echo json_encode(["success" => false, "mensaje" => "Error: $errstr en $errfile:$errline"]);
+    exit;
+});
+
 include __DIR__ . "/connection.php";
 include __DIR__ . "/verifica-usuario.php";
 
@@ -12,7 +22,6 @@ if (!$input || !isset($input['cve_usuario']) || !isset($input['productos'])) {
     exit;
 }
 
-// ✅ Corrección aquí
 $cve_usuario = $input['cve_usuario'];
 $cve_cliente = $input['cve_cliente'] ?? 1;
 $productos = $input['productos'];
@@ -31,8 +40,11 @@ $cve_pedido = $row['nuevo'];
 $sql = "INSERT INTO pedido (cve_usuario, cve_pedido, cve_estatus, fec_crea, fec_mod, total, cve_cliente)
         VALUES (?, ?, 1, ?, ?, 0.00, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("issssi", $cve_usuario, $cve_pedido, $fecha, $fecha, $cve_cliente);
-$stmt->execute();
+$stmt->bind_param("iissi", $cve_usuario, $cve_pedido, $fecha, $fecha, $cve_cliente);
+if (!$stmt->execute()) {
+    echo json_encode(["success" => false, "mensaje" => "Error al insertar pedido: " . $stmt->error]);
+    exit;
+}
 
 $total_pedido = 0.00;
 
@@ -46,8 +58,10 @@ foreach ($productos as $prod) {
     $stmt->bind_param("ii", $cve_usuario, $cve_producto);
     $stmt->execute();
     $result = $stmt->get_result();
-    if (!$row = $result->fetch_assoc())
-        continue;
+
+    if (!$row = $result->fetch_assoc()) {
+        continue; // Producto no encontrado
+    }
 
     $precio = (float) $row['precio'];
     $total = round($precio * $cantidad, 2);
@@ -57,7 +71,10 @@ foreach ($productos as $prod) {
             VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("iiisssd", $cve_usuario, $cve_pedido, $cve_producto, $cantidad, $fecha, $fecha, $total);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        echo json_encode(["success" => false, "mensaje" => "Error al insertar detalle: " . $stmt->error]);
+        exit;
+    }
 
     $total_pedido += $total;
 }
@@ -66,8 +83,9 @@ foreach ($productos as $prod) {
 $sql = "UPDATE pedido SET total = ?, fec_mod = ? WHERE cve_usuario = ? AND cve_pedido = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("dsii", $total_pedido, $fecha, $cve_usuario, $cve_pedido);
-$stmt->execute();
+if (!$stmt->execute()) {
+    echo json_encode(["success" => false, "mensaje" => "Error al actualizar total: " . $stmt->error]);
+    exit;
+}
 
 echo json_encode(["success" => true, "cve_pedido" => $cve_pedido]);
-
-
