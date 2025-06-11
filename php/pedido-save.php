@@ -13,9 +13,9 @@ if (!$input || !isset($input['cve_usuario']) || !isset($input['productos'])) {
     exit;
 }
 
-$cve_usuario = $_POST['cve_usuario'];
-$cve_cliente = $_POST['cve_cliente'];
-$productos = $_POST['productos']; // array de arrays: [ ['cve_producto'=>X, 'cantidad'=>Y], ... ]
+$cve_usuario = $input['cve_usuario'];
+$cve_cliente = $input['cve_cliente'];
+$productos = $input['productos'];
 $fecha = date('Y-m-d H:i:s');
 
 // Obtener nuevo cve_pedido
