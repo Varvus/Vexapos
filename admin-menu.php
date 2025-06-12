@@ -19,7 +19,7 @@
                     <a class="nav-link" href="admin-venta.php">Venta</a>
                 </li>
                 <li class="nav-item">
-                    <a href="admin-reporte.php">Reporte</a>
+                    <a class="nav-link" href="admin-reporte.php">Reporte</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="index.php">Salir</a>
