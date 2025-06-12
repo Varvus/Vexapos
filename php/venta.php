@@ -23,7 +23,7 @@ while ($row = $result->fetch_assoc()) {
         <div class="col">
             <div class="card h-100 seleccionar-producto" data-cve="<?= $p['cve_producto'] ?>"
                 data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
-                <img src="imagenes/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
+                <img src="img/productos/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
                     alt="<?= htmlspecialchars($p['nombre']) ?>" style="height: 150px; object-fit: cover;">
                 <div class="card-body text-center">
                     <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
