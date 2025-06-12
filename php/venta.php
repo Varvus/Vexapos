@@ -2,8 +2,8 @@
 include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
-// Obtener productos activos del usuario
-$sql = "SELECT cve_producto, nombre, precio FROM producto WHERE cve_usuario = ? AND activo = 1 ORDER BY nombre";
+// Obtener productos activos
+$sql = "SELECT cve_producto, nombre, precio, imagen, extension FROM producto WHERE cve_usuario = ? AND activo = 1 ORDER BY nombre";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cve_usuario);
 $stmt->execute();
@@ -16,25 +16,22 @@ while ($row = $result->fetch_assoc()) {
 
 <h5>Venta</h5>
 <hr>
-<p>Seleccione el Producto</p>
-<div class="row g-2 align-items-end">
-    <div class="col-md-5">
-        <label>Producto</label>
-        <select class="form-select" id="producto">
-            <?php foreach ($productos as $p): ?>
-                <option value="<?= $p['cve_producto'] ?>" data-precio="<?= $p['precio'] ?>">
-                    <?= htmlspecialchars($p['nombre']) ?> ($<?= number_format($p['precio'], 2) ?>)
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-    <div class="col-md-3">
-        <label>Cantidad</label>
-        <input type="number" id="cantidad" class="form-control" value="1" min="1">
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
-    </div>
+<p>Seleccione un producto:</p>
+
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-3">
+    <?php foreach ($productos as $p): ?>
+        <div class="col">
+            <div class="card h-100 text-center producto-card" data-id="<?= $p['cve_producto'] ?>"
+                data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
+                <img src="imagenes/<?= $p['imagen'] ?>.<?= $p['extension'] ?>" class="card-img-top img-fluid"
+                    alt="<?= htmlspecialchars($p['nombre']) ?>" style="max-height: 130px; object-fit: contain;">
+                <div class="card-body p-2">
+                    <h6 class="card-title mb-1"><?= htmlspecialchars($p['nombre']) ?></h6>
+                    <p class="card-text text-success mb-0">$<?= number_format($p['precio'], 2) ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
 </div>
 
 <hr>
@@ -94,12 +91,12 @@ while ($row = $result->fetch_assoc()) {
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${item.nombre}</td>
-                <td>${item.cantidad}</td>
-                <td>$${item.precio.toFixed(2)}</td>
-                <td>$${subtotal.toFixed(2)}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="eliminar(${index})">X</button></td>
-            `;
+            <td>${item.nombre}</td>
+            <td>${item.cantidad}</td>
+            <td>$${item.precio.toFixed(2)}</td>
+            <td>$${subtotal.toFixed(2)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="eliminar(${index})">X</button></td>
+        `;
             tbody.appendChild(tr);
         });
 
@@ -118,22 +115,22 @@ while ($row = $result->fetch_assoc()) {
         renderPedido();
     }
 
-    document.getElementById("btn-agregar").addEventListener("click", () => {
-        const select = document.getElementById("producto");
-        const cantidad = parseInt(document.getElementById("cantidad").value);
-        const id = parseInt(select.value);
-        const nombre = select.options[select.selectedIndex].text;
-        const precio = parseFloat(select.options[select.selectedIndex].dataset.precio);
+    document.querySelectorAll(".producto-card").forEach(card => {
+        card.addEventListener("click", () => {
+            const nombre = card.dataset.nombre;
+            const id = parseInt(card.dataset.id);
+            const precio = parseFloat(card.dataset.precio);
 
-        if (cantidad > 0) {
+            let cantidad = prompt(`¿Cuántos quieres de "${nombre}"?`, "1");
+            cantidad = parseInt(cantidad);
+            if (isNaN(cantidad) || cantidad <= 0) return;
+
             pedido.push({ cve_producto: id, nombre, precio, cantidad });
             renderPedido();
-        }
+        });
     });
 
-    document.getElementById("efectivo").addEventListener("input", () => {
-        renderPedido();
-    });
+    document.getElementById("efectivo").addEventListener("input", renderPedido);
 
     document.getElementById("btn-cobrar").addEventListener("click", async () => {
         if (pedido.length === 0) return;
@@ -151,7 +148,7 @@ while ($row = $result->fetch_assoc()) {
 
         const formData = new FormData();
         formData.append("cve_usuario", <?= $cve_usuario ?>);
-        formData.append("cve_cliente", 1); // Temporal
+        formData.append("cve_cliente", 1); // Cliente default
         formData.append("productos", JSON.stringify(pedido));
         formData.append("total", total.toFixed(2));
 
