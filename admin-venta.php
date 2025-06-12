@@ -1,3 +1,5 @@
+<?php include "php/error-reporting.php" ?>
+
 <!DOCTYPE html>
 <html>
 
