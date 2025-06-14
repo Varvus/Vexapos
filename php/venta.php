@@ -36,7 +36,7 @@ while ($row = $result->fetch_assoc()) {
 <p>Seleccione un producto:</p>
 
 <div class="row">
-    <div class="col-8">
+    <div class="col-12 col-md-7">
         <div class="row row-cols-3 row-cols-md-4 g-3">
             <?php foreach ($productos as $p): ?>
                 <div class="col">
@@ -53,7 +53,7 @@ while ($row = $result->fetch_assoc()) {
             <?php endforeach; ?>
         </div>
     </div>
-    <div class="col-4">
+    <div class="col-12 col-md-5">
         <div id="cantidad-container" class="row g-2 align-items-end d-none my-2">
             <label>Cantidad</label>
             <input type="number" id="cantidad" class="form-control" min="1" value="1">
