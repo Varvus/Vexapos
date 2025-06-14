@@ -35,32 +35,35 @@ while ($row = $result->fetch_assoc()) {
 <hr>
 <p>Seleccione un producto:</p>
 
-<div class="row row-cols-2 row-cols-md-4 g-3">
-    <?php foreach ($productos as $p): ?>
-        <div class="col">
-            <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
-                data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
-                <img src="img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
-                    alt="<?= htmlspecialchars($p['nombre']) ?>">
-                <div class="card-body text-center">
-                    <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
-                    <p class="card-text fw-bold">$<?= number_format($p['precio'], 2) ?></p>
+<div class="row">
+    <div class="col-8">
+        <div class="row row-cols-3 row-cols-md-4 g-3">
+            <?php foreach ($productos as $p): ?>
+                <div class="col">
+                    <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
+                        data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
+                        <img src="img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
+                            alt="<?= htmlspecialchars($p['nombre']) ?>">
+                        <div class="card-body text-center">
+                            <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
+                            <p class="card-text fw-bold">$<?= number_format($p['precio'], 2) ?></p>
+                        </div>
+                    </div>
                 </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <div class="col-4">
+        <div id="cantidad-container" class="row g-2 align-items-end d-none my-2">
+            <div class="col-md-4">
+                <label>Cantidad</label>
+                <input type="number" id="cantidad" class="form-control" min="1" value="1">
+            </div>
+            <div class="col-md-2">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
             </div>
         </div>
-    <?php endforeach; ?>
-</div>
-
-<hr>
-
-<div id="cantidad-container" class="row g-2 align-items-end d-none my-2">
-    <div class="col-md-4">
-        <label>Cantidad</label>
-        <input type="number" id="cantidad" class="form-control" min="1" value="1">
-    </div>
-    <div class="col-md-2">
-        <label>&nbsp;</label>
-        <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
     </div>
 </div>
 
