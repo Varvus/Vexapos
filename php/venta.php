@@ -65,7 +65,7 @@ while ($row = $result->fetch_assoc()) {
 
 <!-- Floating Button -->
 <button type="button" id="btn-ver-pedido" class="btn btn-primary position-fixed bottom-0 end-0 m-3 d-none" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPedido">
-    Ver pedido
+    <i class="bi bi-cart4"></i>
 </button>
 
 <!-- Offcanvas Pedido -->
