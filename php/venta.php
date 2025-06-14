@@ -2,7 +2,6 @@
 include __DIR__ . "/connect.php";
 include __DIR__ . "/verifica-usuario.php";
 
-// Obtener productos activos con imagen
 $sql = "SELECT cve_producto, nombre, precio, imagen FROM producto WHERE cve_usuario = ? AND activo = 1 ORDER BY nombre LIMIT 100";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $cve_usuario);
@@ -29,15 +28,25 @@ while ($row = $result->fetch_assoc()) {
         height: 150px;
         object-fit: cover;
     }
+
+    .cantidad-card {
+        transition: opacity 0.2s ease;
+    }
+
+    #buscador {
+        margin-bottom: 1rem;
+    }
 </style>
 
 <h5>Venta</h5>
 <hr>
 <p>Seleccione un producto:</p>
 
+<input type="text" id="buscador" class="form-control" placeholder="Buscar producto...">
+
 <div class="row">
     <div class="col-12 col-md-7">
-        <div class="row row-cols-2 row-cols-md-4 g-3">
+        <div class="row row-cols-2 row-cols-md-4 g-3" id="contenedor-productos">
             <?php foreach ($productos as $p): ?>
                 <div class="col">
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
@@ -47,6 +56,11 @@ while ($row = $result->fetch_assoc()) {
                         <div class="card-body text-center">
                             <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
                             <p class="card-text fw-bold">$<?= number_format($p['precio'], 2) ?></p>
+
+                            <div class="cantidad-card d-none mt-2">
+                                <input type="number" class="form-control cantidad-input mb-1" min="1" value="1">
+                                <button class="btn btn-sm btn-primary btn-agregar-card w-100">Agregar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -54,12 +68,6 @@ while ($row = $result->fetch_assoc()) {
         </div>
     </div>
     <div class="col-12 col-md-5">
-        <div id="cantidad-container" class="row g-2 align-items-end d-none my-2">
-            <label>Cantidad</label>
-            <input type="number" id="cantidad" class="form-control" min="1" value="1">
-            <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
-        </div>
-
         <div id="tabla-pedido" class="table-responsive d-none">
             <table class="table table-bordered mt-3">
                 <thead>
@@ -97,7 +105,6 @@ while ($row = $result->fetch_assoc()) {
 
 <script>
     let pedido = [];
-    let productoSeleccionado = null;
 
     function renderPedido() {
         const tbody = document.getElementById("detalle");
@@ -142,46 +149,61 @@ while ($row = $result->fetch_assoc()) {
         renderPedido();
     }
 
+    // Selección de producto
     document.querySelectorAll(".seleccionar-producto").forEach(card => {
-        card.addEventListener("click", () => {
-            // Quitar clase 'selected' de todas
-            document.querySelectorAll(".seleccionar-producto").forEach(c => c.classList.remove("selected"));
-            // Agregar clase al clicado
-            card.classList.add("selected");
+        card.addEventListener("click", e => {
+            e.stopPropagation(); // No propagar para evitar que el document click lo desmarque
 
-            productoSeleccionado = {
+            // Quitar selección de todos
+            document.querySelectorAll(".seleccionar-producto").forEach(c => {
+                c.classList.remove("selected");
+                c.querySelector(".cantidad-card").classList.add("d-none");
+            });
+
+            // Seleccionar este
+            card.classList.add("selected");
+            card.querySelector(".cantidad-card").classList.remove("d-none");
+        });
+    });
+
+    // Agregar desde cada card
+    document.querySelectorAll(".btn-agregar-card").forEach(btn => {
+        btn.addEventListener("click", e => {
+            e.stopPropagation();
+
+            const card = btn.closest(".seleccionar-producto");
+            const cantidad = parseInt(card.querySelector(".cantidad-input").value || "1");
+
+            if (cantidad <= 0) return;
+
+            const producto = {
                 cve_producto: parseInt(card.dataset.cve),
                 nombre: card.dataset.nombre,
-                precio: parseFloat(card.dataset.precio)
+                precio: parseFloat(card.dataset.precio),
+                cantidad
             };
 
-            document.getElementById("cantidad-container").classList.remove("d-none");
-            document.getElementById("cantidad").value = 1;
+            pedido.push(producto);
+            renderPedido();
+
+            // Limpiar selección
+            card.classList.remove("selected");
+            card.querySelector(".cantidad-card").classList.add("d-none");
         });
     });
 
-    document.getElementById("btn-agregar").addEventListener("click", () => {
-        const cantidad = parseInt(document.getElementById("cantidad").value);
-        if (!productoSeleccionado || cantidad <= 0) return;
-
-        pedido.push({
-            ...productoSeleccionado,
-            cantidad
+    // Click fuera de productos → deselecciona
+    document.addEventListener("click", () => {
+        document.querySelectorAll(".seleccionar-producto").forEach(c => {
+            c.classList.remove("selected");
+            c.querySelector(".cantidad-card").classList.add("d-none");
         });
-
-        productoSeleccionado = null;
-        document.getElementById("cantidad-container").classList.add("d-none");
-
-        // Quitar borde seleccionado
-        document.querySelectorAll(".seleccionar-producto").forEach(c => c.classList.remove("selected"));
-
-        renderPedido();
     });
 
-    document.getElementById("efectivo").addEventListener("input", () => {
-        renderPedido();
-    });
+    // Cambio en efectivo
+    document.getElementById("efectivo").addEventListener("input", renderPedido);
 
+    // Botón cobrar
     document.getElementById("btn-cobrar").addEventListener("click", async () => {
         if (pedido.length === 0) return;
 
@@ -198,7 +220,7 @@ while ($row = $result->fetch_assoc()) {
 
         const formData = new FormData();
         formData.append("cve_usuario", <?= $cve_usuario ?>);
-        formData.append("cve_cliente", 1); // Temporal
+        formData.append("cve_cliente", 1);
         formData.append("productos", JSON.stringify(pedido));
         formData.append("total", total.toFixed(2));
 
@@ -224,5 +246,14 @@ while ($row = $result->fetch_assoc()) {
         } finally {
             btnCobrar.disabled = false;
         }
+    });
+
+    // Buscador
+    document.getElementById("buscador").addEventListener("input", function () {
+        const valor = this.value.toLowerCase();
+        document.querySelectorAll(".seleccionar-producto").forEach(card => {
+            const nombre = card.dataset.nombre.toLowerCase();
+            card.parentElement.style.display = nombre.includes(valor) ? "" : "none";
+        });
     });
 </script>
