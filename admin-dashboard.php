@@ -2,12 +2,12 @@
 include __DIR__ . "/php/connect.php";
 include __DIR__ . "/php/verifica-usuario.php";
 
-// Total productos activos
-$stmt = $conn->prepare("SELECT COUNT(*) AS total FROM producto WHERE cve_usuario = ? AND activo = 1");
+// Total ventas del día
+$stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND DATE(fec_crea) = CURDATE()");
 $stmt->bind_param("i", $cve_usuario);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
-$total_productos = $result['total'];
+$total_ventas_dia = $result['total'] ?? 0;
 
 // Total ventas del mes
 $stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND MONTH(fec_crea) = MONTH(CURRENT_DATE()) AND YEAR(fec_crea) = YEAR(CURRENT_DATE())");
@@ -53,10 +53,10 @@ while ($row = $result->fetch_assoc()) {
             <div class="col">
                 <div class="card text-bg-primary shadow h-100">
                     <div class="card-body d-flex align-items-center">
-                        <i class="bi bi-box-seam display-6 me-3"></i>
+                        <i class="bi bi-currency-dollar display-6 me-3"></i>
                         <div>
-                            <div class="fw-bold fs-5"><?= $total_productos ?></div>
-                            <div>Productos Activos</div>
+                            <div class="fw-bold fs-5">$<?= number_format($total_ventas_dia, 2) ?></div>
+                            <div>Venta Total del Día</div>
                         </div>
                     </div>
                 </div>
