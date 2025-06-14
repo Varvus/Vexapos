@@ -1,134 +1,136 @@
-<?php
-include __DIR__ . "/php/connect.php";
-include __DIR__ . "/php/verifica-usuario.php";
-
-// Ventas del día
-$sql_ventas = "
-    SELECT IFNULL(SUM(total), 0) AS total_dia 
-    FROM pedido 
-    WHERE cve_usuario = ? 
-    AND DATE(fec_crea) = CURDATE()
-";
-$stmt = $conn->prepare($sql_ventas);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$total_ventas = $stmt->get_result()->fetch_assoc()['total_dia'];
-
-// Productos activos
-$sql_productos = "
-    SELECT COUNT(*) AS total_productos 
-    FROM producto 
-    WHERE cve_usuario = ? AND activo = 1
-";
-$stmt = $conn->prepare($sql_productos);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$total_productos = $stmt->get_result()->fetch_assoc()['total_productos'];
-
-// Clientes activos
-$sql_clientes = "
-    SELECT COUNT(*) AS total_clientes 
-    FROM cliente 
-    WHERE cve_usuario = ? AND activo = 1
-";
-$stmt = $conn->prepare($sql_clientes);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$total_clientes = $stmt->get_result()->fetch_assoc()['total_clientes'];
-
-// Últimos 5 pedidos
-$sql_pedidos = "
-    SELECT p.cve_pedido, p.total, p.fec_crea, c.nombre AS cliente 
-    FROM pedido p
-    LEFT JOIN cliente c ON p.cve_usuario = c.cve_usuario AND p.cve_cliente = c.cve_cliente
-    WHERE p.cve_usuario = ?
-    ORDER BY p.fec_crea DESC
-    LIMIT 5
-";
-$stmt = $conn->prepare($sql_pedidos);
-$stmt->bind_param("i", $cve_usuario);
-$stmt->execute();
-$ultimos_pedidos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-?>
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <?php include "initials.php"; ?>
     <title>VEXAPOS: Admin-Dashboard</title>
+    <style>
+        .card-icon {
+            font-size: 2rem;
+        }
+    </style>
 </head>
+
 <body>
     <?php include "admin-menu.php"; ?>
 
-    <div class="container my-4">
-        <h4 class="mb-4">Dashboard</h4>
-        <div class="row g-3">
+    <?php
+    include __DIR__ . "/php/connect.php";
+    include __DIR__ . "/php/verifica-usuario.php";
 
+    // Total de productos activos
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM producto WHERE cve_usuario = ? AND activo = 1");
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $stmt->bind_result($total_productos);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Pedidos del mes
+    $stmt = $conn->prepare("SELECT IFNULL(SUM(total), 0) FROM pedido WHERE cve_usuario = ? AND MONTH(fec_crea) = MONTH(CURDATE()) AND YEAR(fec_crea) = YEAR(CURDATE())");
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $stmt->bind_result($total_mes);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Producto más vendido
+    $stmt = $conn->prepare("SELECT p.nombre, SUM(pd.cantidad) AS total_vendido FROM pedido_det pd JOIN producto p ON p.cve_usuario = pd.cve_usuario AND p.cve_producto = pd.cve_producto JOIN pedido pe ON pe.cve_usuario = pd.cve_usuario AND pe.cve_pedido = pd.cve_pedido WHERE pd.cve_usuario = ? AND MONTH(pe.fec_crea) = MONTH(CURDATE()) GROUP BY p.nombre ORDER BY total_vendido DESC LIMIT 1");
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $stmt->bind_result($producto_top, $total_top);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!$producto_top) {
+        $producto_top = "Sin ventas";
+        $total_top = 0;
+    }
+
+    // Ventas por hora (hoy)
+    $stmt = $conn->prepare("SELECT HOUR(fec_crea) AS hora, SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND DATE(fec_crea) = CURDATE() GROUP BY hora");
+    $stmt->bind_param("i", $cve_usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $horas = [];
+    $ventas = [];
+    while ($row = $result->fetch_assoc()) {
+        $horas[] = $row['hora'] . ":00";
+        $ventas[] = $row['total'];
+    }
+    $stmt->close();
+    ?>
+
+    <div class="container py-4">
+        <h4>Dashboard</h4>
+        <hr>
+
+        <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="card text-bg-primary shadow">
-                    <div class="card-body">
-                        <h5><i class="bi bi-cash-coin"></i> Ventas del día</h5>
-                        <p class="display-6 fw-bold">$<?= number_format($total_ventas, 2) ?></p>
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-box card-icon text-primary"></i>
+                        <h5 class="mt-2">Productos</h5>
+                        <p class="fs-4 fw-bold mb-0"><?= $total_productos ?></p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card text-bg-success shadow">
-                    <div class="card-body">
-                        <h5><i class="bi bi-box-seam"></i> Productos activos</h5>
-                        <p class="display-6 fw-bold"><?= $total_productos ?></p>
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-currency-dollar card-icon text-success"></i>
+                        <h5 class="mt-2">Ventas del mes</h5>
+                        <p class="fs-4 fw-bold mb-0">$<?= number_format($total_mes, 2) ?></p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card text-bg-warning shadow">
-                    <div class="card-body">
-                        <h5><i class="bi bi-people"></i> Clientes activos</h5>
-                        <p class="display-6 fw-bold"><?= $total_clientes ?></p>
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-star-fill card-icon text-warning"></i>
+                        <h5 class="mt-2">Top del mes</h5>
+                        <p class="fw-bold mb-0"><?= htmlspecialchars($producto_top) ?> (<?= $total_top ?>)</p>
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <div class="my-4 d-flex justify-content-between align-items-center">
-            <h5>Últimos pedidos</h5>
-            <a href="admin-venta.php" class="btn btn-outline-primary">
-                <i class="bi bi-plus-circle"></i> Nueva venta
-            </a>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-striped table-hover shadow-sm">
-                <thead class="table-dark">
-                    <tr>
-                        <th># Pedido</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($ultimos_pedidos as $p): ?>
-                        <tr>
-                            <td><?= $p['cve_pedido'] ?></td>
-                            <td><?= htmlspecialchars($p['cliente'] ?: 'Sin cliente') ?></td>
-                            <td><?= date("d/m/Y H:i", strtotime($p['fec_crea'])) ?></td>
-                            <td>$<?= number_format($p['total'], 2) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <?php if (empty($ultimos_pedidos)): ?>
-                        <tr>
-                            <td colspan="4" class="text-center">No hay pedidos recientes</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Ventas por hora (hoy)</h5>
+                <canvas id="ventasHoraChart" height="120"></canvas>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('ventasHoraChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($horas) ?>,
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: <?= json_encode($ventas) ?>,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
     <?php include "footer.php"; ?>
 </body>
+
 </html>
