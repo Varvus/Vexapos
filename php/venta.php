@@ -55,47 +55,42 @@ while ($row = $result->fetch_assoc()) {
     </div>
     <div class="col-4">
         <div id="cantidad-container" class="row g-2 align-items-end d-none my-2">
-            <div class="col-md-4">
-                <label>Cantidad</label>
-                <input type="number" id="cantidad" class="form-control" min="1" value="1">
+            <label>Cantidad</label>
+            <input type="number" id="cantidad" class="form-control" min="1" value="1">
+            <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
+        </div>
+
+        <div id="tabla-pedido" class="table-responsive d-none">
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="detalle"></tbody>
+            </table>
+
+            <div class="mb-2">
+                <strong>Total: $<span id="total">0.00</span></strong>
             </div>
-            <div class="col-md-2">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary w-100" id="btn-agregar">Agregar</button>
+
+            <div class="row g-2 align-items-end mb-2">
+                <div class="col-md-4">
+                    <label>Efectivo recibido</label>
+                    <input type="number" id="efectivo" class="form-control" min="0" step="0.01">
+                </div>
+                <div class="col-md-4">
+                    <label>Cambio</label>
+                    <div class="form-control bg-light" id="cambio">$0.00</div>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-success w-100" id="btn-cobrar">Cobrar</button>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div id="tabla-pedido" class="table-responsive d-none">
-    <table class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="detalle"></tbody>
-    </table>
-
-    <div class="mb-2">
-        <strong>Total: $<span id="total">0.00</span></strong>
-    </div>
-
-    <div class="row g-2 align-items-end mb-2">
-        <div class="col-md-4">
-            <label>Efectivo recibido</label>
-            <input type="number" id="efectivo" class="form-control" min="0" step="0.01">
-        </div>
-        <div class="col-md-4">
-            <label>Cambio</label>
-            <div class="form-control bg-light" id="cambio">$0.00</div>
-        </div>
-        <div class="col-md-4">
-            <button class="btn btn-success w-100" id="btn-cobrar">Cobrar</button>
         </div>
     </div>
 </div>
