@@ -37,7 +37,7 @@ while ($row = $result->fetch_assoc()) {
 
 <div class="row">
     <div class="col-12 col-md-7">
-        <div class="row row-cols-3 row-cols-md-4 g-3">
+        <div class="row row-cols-2 row-cols-md-4 g-3">
             <?php foreach ($productos as $p): ?>
                 <div class="col">
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
