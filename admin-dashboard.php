@@ -1,13 +1,21 @@
 <?php
-include __DIR__ . "/php/connect.php";
-include __DIR__ . "/php/verifica-usuario.php";
+session_start();
 
-// Total ventas del día
+include __DIR__ . "/php/connect.php";
+
+if (!isset($_SESSION['cve_usuario'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$cve_usuario = $_SESSION['cve_usuario'];
+
+// Venta total del día
 $stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND DATE(fec_crea) = CURDATE()");
 $stmt->bind_param("i", $cve_usuario);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
-$total_ventas_dia = $result['total'] ?? 0;
+$venta_total_dia = $result['total'] ?? 0;
 
 // Total ventas del mes
 $stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND MONTH(fec_crea) = MONTH(CURRENT_DATE()) AND YEAR(fec_crea) = YEAR(CURRENT_DATE())");
@@ -30,7 +38,7 @@ $stmt->execute();
 $horas = array_fill(0, 24, 0);
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
-    $horas[(int)$row['hora']] = (float)$row['total'];
+    $horas[(int) $row['hora']] = (float) $row['total'];
 }
 ?>
 
@@ -51,11 +59,11 @@ while ($row = $result->fetch_assoc()) {
 
         <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div class="col">
-                <div class="card text-bg-primary shadow h-100">
+                <div class="card text-bg-info shadow h-100">
                     <div class="card-body d-flex align-items-center">
-                        <i class="bi bi-currency-dollar display-6 me-3"></i>
+                        <i class="bi bi-calendar-day display-6 me-3"></i>
                         <div>
-                            <div class="fw-bold fs-5">$<?= number_format($total_ventas_dia, 2) ?></div>
+                            <div class="fw-bold fs-5">$<?= number_format($venta_total_dia, 2) ?></div>
                             <div>Venta Total del Día</div>
                         </div>
                     </div>
@@ -114,7 +122,7 @@ while ($row = $result->fetch_assoc()) {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return '$' + value;
                             }
                         }
@@ -126,4 +134,5 @@ while ($row = $result->fetch_assoc()) {
 
     <?php include "footer.php"; ?>
 </body>
+
 </html>
