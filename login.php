@@ -38,8 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="bg-light d-flex align-items-center justify-content-center vh-100">
 
-    <?php include "admin-menu.php" ?>
-
     <div class="card p-4 shadow" style="max-width: 400px; width: 100%;">
         <h4 class="mb-3 text-center">VEXAPOS</h4>
         <?php if ($mensaje): ?>
