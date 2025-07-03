@@ -10,11 +10,19 @@
     $cve_usuario = 0; // No definido
 }*/
 
-$cve_usuario = 1;
+session_start();
+if (!isset($_SESSION['cve_usuario'])) {
+    header("Location: login.php");
+    exit;
+}
+$cve_usuario = $_SESSION['cve_usuario'];
+
+
+/*$cve_usuario = 1;
 
 // Validar que sea válido
 if ($cve_usuario <= 0) {
     echo '<div class="alert alert-danger">ACCESO DENEGADO</div>';
     exit;
-}
+}*/
 ?>
