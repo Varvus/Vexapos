@@ -64,7 +64,8 @@ while ($row = $result->fetch_assoc()) {
 </div>
 
 <!-- Floating Button -->
-<button type="button" id="btn-ver-pedido" class="btn btn-primary position-fixed bottom-0 end-0 m-3 d-none" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPedido">
+<button type="button" id="btn-ver-pedido" class="btn btn-primary position-fixed bottom-0 end-0 m-3 d-none"
+    data-bs-toggle="offcanvas" data-bs-target="#offcanvasPedido">
     <i class="bi bi-cart4"></i>
 </button>
 
@@ -229,6 +230,13 @@ while ($row = $result->fetch_assoc()) {
                 document.getElementById("efectivo").value = "";
                 renderPedido();
                 bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvasPedido")).hide();
+
+                //Abrir e imprimir ticket sin mostrarlo al usuario
+                const ticketWindow = window.open("php/ticket.php?cve_pedido=" + data.cve_pedido, "_blank", "width=400,height=600");
+                ticketWindow.onload = () => {
+                    ticketWindow.print();
+                    ticketWindow.onafterprint = () => ticketWindow.close();
+                };
             } else {
                 alert("Error al guardar el pedido. " + (data.mensaje || "Error desconocido"));
             }
