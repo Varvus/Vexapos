@@ -85,6 +85,11 @@ $detalles = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <p class="text-center small mt-3">Gracias por su compra</p>
     <p class="text-center small text-muted">Generado por VEXAPOS</p>
+
+    <?php for ($i = 0; $i < 10; $i++): ?>
+        <br>
+    <?php endfor; ?>
+
 </body>
 
 </html>
