@@ -62,11 +62,17 @@ while ($row = $result->fetch_assoc()) {
         continue;
     }
 
-    // Redimensionar
+    // Redimensionar conservando transparencia si aplica
     $ancho = imagesx($img);
     $alto = imagesy($img);
     $nuevoAlto = intval($alto * ($thumbWidth / $ancho));
     $thumb = imagecreatetruecolor($thumbWidth, $nuevoAlto);
+
+    // Manejo de transparencia
+    imagealphablending($thumb, false);
+    imagesavealpha($thumb, true);
+
+    // Copiar redimensionando
     imagecopyresampled($thumb, $img, 0, 0, 0, 0, $thumbWidth, $nuevoAlto, $ancho, $alto);
 
     // Guardar como .webp con nombre correcto
@@ -89,7 +95,6 @@ while ($row = $result->fetch_assoc()) {
             unlink($ruta_original);
             echo "🗑️  Borrado original: $imagen_original\n";
         }
-
     } else {
         echo "❌ Error al guardar thumbnail de: $imagen_original\n";
     }
