@@ -46,8 +46,12 @@ while ($row = $result->fetch_assoc()) {
                 <div class="col">
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
                         data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
-                        <img src="img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
-                            alt="<?= htmlspecialchars($p['nombre']) ?>" loading="lazy">
+
+                        <!--<img src="img/producto/<?= //htmlspecialchars($p['imagen']) ?>" class="card-img-top"
+                            alt="<?= //htmlspecialchars($p['nombre']) ?>" loading="lazy"> -->
+                        <img data-src="img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img"
+                            alt="<?= htmlspecialchars($p['nombre']) ?>">
+
                         <div class="card-body text-center">
                             <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
                             <p class="card-text fw-bold mb-0">$<?= number_format($p['precio'], 2) ?></p>
@@ -247,4 +251,21 @@ while ($row = $result->fetch_assoc()) {
             btnCobrar.disabled = false;
         }
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+    const lazyImages = document.querySelectorAll('img.lazy-img');
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove("lazy-img");
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    lazyImages.forEach(img => observer.observe(img));
+});
+
 </script>
