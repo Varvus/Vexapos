@@ -45,15 +45,14 @@ while ($row = $result->fetch_assoc()) {
             <?php foreach ($productos as $p): ?>
                 <div class="col">
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
-                        data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
+                        data-nombre="<?php htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
 
-                        <img src="/../img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img" 
-                            alt="<?= htmlspecialchars($p['nombre']) ?>">
-
+                        <img src="/../img/producto/<?php htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img" 
+                            alt="<?php htmlspecialchars($p['nombre']) ?>">
 
                         <div class="card-body text-center">
-                            <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
-                            <p class="card-text fw-bold mb-0">$<?= number_format($p['precio'], 2) ?></p>
+                            <h6 class="card-title"><?php htmlspecialchars($p['nombre']) ?></h6>
+                            <p class="card-text fw-bold mb-0">$<?php number_format($p['precio'], 2) ?></p>
                             <div class="cantidad-container d-none">
                                 <input type="number" class="form-control mt-2 cantidad-input" min="1" value="1">
                                 <button class="btn btn-sm btn-primary w-100 mt-2 btn-agregar">Agregar</button>
@@ -214,7 +213,7 @@ while ($row = $result->fetch_assoc()) {
         btnCobrar.disabled = true;
 
         const formData = new FormData();
-        formData.append("cve_usuario", <?= $cve_usuario ?>);
+        formData.append("cve_usuario", <?php $cve_usuario ?>);
         formData.append("cve_cliente", 1); // Temporal
         formData.append("productos", JSON.stringify(pedido));
         formData.append("total", total.toFixed(2));
