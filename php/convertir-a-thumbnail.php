@@ -31,7 +31,7 @@ while ($row = $result->fetch_assoc()) {
     $ruta_original = $dir . $imagen_original;
 
     if (!file_exists($ruta_original)) {
-        echo "❌ No se encontró imagen: $ruta_original\n";
+        echo "❌ NOOO se encontró imagen: $ruta_original\n";
         continue;
     }
 
