@@ -27,15 +27,44 @@ if (empty($cve_producto)) {
 // Procesar imagen si se subió
 if (isset($_FILES["imagen_archivo"]) && $_FILES["imagen_archivo"]["error"] === UPLOAD_ERR_OK) {
     $ext_permitidas = ["jpg", "jpeg", "png", "webp"];
-    $ext = strtolower(pathinfo($_FILES["imagen_archivo"]["name"], PATHINFO_EXTENSION));
+    $nombre_original = $_FILES["imagen_archivo"]["name"];
+    $ext = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
 
     if (in_array($ext, $ext_permitidas)) {
-        $nombre_archivo = "{$cve_usuario}-{$cve_producto}." . $ext;
-        $ruta_destino = __DIR__ . "/../img/producto/" . $nombre_archivo;
+        $nombre_base = "{$cve_usuario}-{$cve_producto}";
+        $nombre_archivo = $nombre_base . ".webp";
+        $ruta_thumb = __DIR__ . "/../img/producto/" . $nombre_archivo;
 
-        if (move_uploaded_file($_FILES["imagen_archivo"]["tmp_name"], $ruta_destino)) {
-            $imagen = $nombre_archivo;
+        // Cargar imagen
+        $img_tmp = $_FILES["imagen_archivo"]["tmp_name"];
+        switch ($ext) {
+            case "jpeg":
+            case "jpg":
+                $original = imagecreatefromjpeg($img_tmp);
+                break;
+            case "png":
+                $original = imagecreatefrompng($img_tmp);
+                break;
+            case "webp":
+                $original = imagecreatefromwebp($img_tmp);
+                break;
+            default:
+                die("Formato no soportado.");
         }
+
+        // Crear thumbnail (300px de ancho)
+        $ancho = imagesx($original);
+        $alto = imagesy($original);
+        $nuevoAncho = 300;
+        $nuevoAlto = intval($alto * ($nuevoAncho / $ancho));
+        $thumb = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+        imagecopyresampled($thumb, $original, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
+        imagewebp($thumb, $ruta_thumb, 70); // calidad del 70%
+
+        imagedestroy($original);
+        imagedestroy($thumb);
+
+        $imagen = $nombre_archivo;
     } else {
         die("Extensión de archivo no permitida. Solo se permiten: jpg, jpeg, png, webp.");
     }
