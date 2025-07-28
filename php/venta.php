@@ -47,10 +47,10 @@ while ($row = $result->fetch_assoc()) {
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
                         data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
                         <img src="img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top"
-                            alt="<?= htmlspecialchars($p['nombre']) ?>">
+                            alt="<?= htmlspecialchars($p['nombre']) ?>" loading="lazy">
                         <div class="card-body text-center">
                             <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
-                            <p class="card-text fw-bold">$<?= number_format($p['precio'], 2) ?></p>
+                            <p class="card-text fw-bold mb-0">$<?= number_format($p['precio'], 2) ?></p>
                             <div class="cantidad-container d-none">
                                 <input type="number" class="form-control mt-2 cantidad-input" min="1" value="1">
                                 <button class="btn btn-sm btn-primary w-100 mt-2 btn-agregar">Agregar</button>
