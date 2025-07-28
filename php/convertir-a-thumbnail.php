@@ -5,7 +5,9 @@ error_reporting(E_ALL);
 
 include __DIR__ . "/connect.php"; // Tu conexión a MySQL
 
-$dir = __DIR__ . "../img/producto/";
+//$dir = __DIR__ . "/img/producto/";
+$dir = __DIR__ . "/../img/producto/";
+
 $thumbWidth = 300;
 $calidadWebp = 70;
 
