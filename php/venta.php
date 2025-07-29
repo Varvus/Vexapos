@@ -50,7 +50,7 @@ while ($row = $result->fetch_assoc()) {
                         <img data-src="/img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img" 
                             alt="<?= htmlspecialchars($p['nombre']) ?>"> 
 
-                        <div class="card-body text-center">
+                        <div class="card-body text-center p-1">
                             <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
                             <p class="card-text fw-bold mb-0">$<?= number_format($p['precio'], 2) ?></p>
                             <div class="cantidad-container d-none">
