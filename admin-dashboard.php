@@ -3,6 +3,8 @@ session_start();
 
 include __DIR__ . "/php/connect.php";
 
+date_default_timezone_set("America/Mexico_City"); // Ajustar a tu zona
+
 if (!isset($_SESSION['cve_usuario'])) {
     header("Location: login.php");
     exit;
@@ -10,9 +12,13 @@ if (!isset($_SESSION['cve_usuario'])) {
 
 $cve_usuario = $_SESSION['cve_usuario'];
 
+// Fecha de hoy
+$inicioHoy = date("Y-m-d 00:00:00");
+$finHoy = date("Y-m-d 23:59:59");
+
 // Venta total del día
-$stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND DATE(fec_crea) = CURDATE()");
-$stmt->bind_param("i", $cve_usuario);
+$stmt = $conn->prepare("SELECT SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND fec_crea BETWEEN ? AND ?");
+$stmt->bind_param("iss", $cve_usuario, $inicioHoy, $finHoy);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
 $venta_total_dia = $result['total'] ?? 0;
@@ -32,35 +38,36 @@ $result = $stmt->get_result()->fetch_assoc();
 $producto_mas_vendido = $result ? $result['nombre'] . " ({$result['total']} vendidos)" : "Sin ventas registradas";
 
 // Ventas por hora del día actual
-$stmt = $conn->prepare("SELECT HOUR(fec_crea) AS hora, SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND DATE(fec_crea) = CURDATE() GROUP BY HOUR(fec_crea)");
-$stmt->bind_param("i", $cve_usuario);
+$stmt = $conn->prepare("SELECT HOUR(fec_crea) AS hora, SUM(total) AS total FROM pedido WHERE cve_usuario = ? AND fec_crea BETWEEN ? AND ? GROUP BY HOUR(fec_crea)");
+$stmt->bind_param("iss", $cve_usuario, $inicioHoy, $finHoy);
 $stmt->execute();
 $horas = array_fill(0, 24, 0);
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
-    $horas[(int) $row['hora']] = (float) $row['total'];
+    $horas[(int)$row['hora']] = (float)$row['total'];
 }
 
-// Ventas por producto del día
-$stmt = $conn->prepare("SELECT p.nombre, SUM(d.cantidad) AS total 
-                        FROM pedido_det d 
-                        JOIN producto p ON p.cve_producto = d.cve_producto 
-                        WHERE d.cve_usuario = ? AND DATE(d.fec_crea) = CURDATE() 
-                        GROUP BY d.cve_producto 
-                        ORDER BY total DESC");
-$stmt->bind_param("i", $cve_usuario);
+// Ventas totales por producto del día
+$stmt = $conn->prepare("
+    SELECT p.nombre, SUM(d.cantidad) AS total
+    FROM pedido_det d
+    JOIN producto p ON p.cve_producto = d.cve_producto
+    WHERE d.cve_usuario = ? AND d.fec_crea BETWEEN ? AND ?
+    GROUP BY d.cve_producto
+    ORDER BY total DESC
+");
+$stmt->bind_param("iss", $cve_usuario, $inicioHoy, $finHoy);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$productos_dia = [];
-$ventas_dia = [];
-
+$productos = [];
+$ventas_producto = [];
 while ($row = $result->fetch_assoc()) {
-    $productos_dia[] = $row['nombre'];
-    $ventas_dia[] = (int) $row['total'];
+    $productos[] = $row['nombre'];
+    $ventas_producto[] = (int)$row['total'];
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -123,11 +130,12 @@ while ($row = $result->fetch_assoc()) {
         </div>
 
         <div class="card shadow mb-4">
-            <div class="card-header bg-white fw-bold">Ventas por Producto (Hoy)</div>
+            <div class="card-header bg-white fw-bold">Ventas Totales por Producto (Hoy)</div>
             <div class="card-body">
                 <canvas id="grafica-productos" height="120"></canvas>
             </div>
         </div>
+
 
     </div>
 
@@ -163,27 +171,25 @@ while ($row = $result->fetch_assoc()) {
         new Chart(ctxProductos, {
             type: 'bar',
             data: {
-                labels: <?= json_encode($productos_dia) ?>,
+                labels: <?= json_encode($productos) ?>,
                 datasets: [{
-                    label: 'Cantidad vendida',
-                    data: <?= json_encode($ventas_dia) ?>,
-                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                    borderColor: 'rgba(40, 167, 69, 1)',
+                    label: 'Cantidad Vendida',
+                    data: <?= json_encode($ventas_producto) ?>,
+                    backgroundColor: 'rgba(255, 193, 7, 0.6)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
-                indexAxis: 'y',
+                indexAxis: 'y', // Gráfico de barras horizontal (puedes quitarlo si prefieres vertical)
                 scales: {
                     x: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
+                        beginAtZero: true
                     }
                 }
             }
         });
+
 
     </script>
 
