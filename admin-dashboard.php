@@ -40,6 +40,26 @@ $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
     $horas[(int) $row['hora']] = (float) $row['total'];
 }
+
+// Ventas por producto del día
+$stmt = $conn->prepare("SELECT p.nombre, SUM(d.cantidad) AS total 
+                        FROM pedido_det d 
+                        JOIN producto p ON p.cve_producto = d.cve_producto 
+                        WHERE d.cve_usuario = ? AND DATE(d.fec_crea) = CURDATE() 
+                        GROUP BY d.cve_producto 
+                        ORDER BY total DESC");
+$stmt->bind_param("i", $cve_usuario);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$productos_dia = [];
+$ventas_dia = [];
+
+while ($row = $result->fetch_assoc()) {
+    $productos_dia[] = $row['nombre'];
+    $ventas_dia[] = (int) $row['total'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -101,6 +121,14 @@ while ($row = $result->fetch_assoc()) {
                 <canvas id="grafica-horas" height="120"></canvas>
             </div>
         </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-white fw-bold">Ventas por Producto (Hoy)</div>
+            <div class="card-body">
+                <canvas id="grafica-productos" height="120"></canvas>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -130,6 +158,33 @@ while ($row = $result->fetch_assoc()) {
                 }
             }
         });
+
+        const ctxProductos = document.getElementById('grafica-productos');
+        new Chart(ctxProductos, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($productos_dia) ?>,
+                datasets: [{
+                    label: 'Cantidad vendida',
+                    data: <?= json_encode($ventas_dia) ?>,
+                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
     </script>
 
     <?php include "footer.php"; ?>
