@@ -47,8 +47,8 @@ while ($row = $result->fetch_assoc()) {
                     <div class="card seleccionar-producto h-100" data-cve="<?= $p['cve_producto'] ?>"
                         data-nombre="<?= htmlspecialchars($p['nombre']) ?>" data-precio="<?= $p['precio'] ?>">
 
-                        <img data-src="/img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img" 
-                            alt="<?= htmlspecialchars($p['nombre']) ?>"> 
+                        <img data-src="/img/producto/<?= htmlspecialchars($p['imagen']) ?>" class="card-img-top lazy-img"
+                            alt="<?= htmlspecialchars($p['nombre']) ?>">
 
                         <div class="card-body text-center p-1">
                             <h6 class="card-title"><?= htmlspecialchars($p['nombre']) ?></h6>
@@ -184,15 +184,23 @@ while ($row = $result->fetch_assoc()) {
 
             if (cantidad <= 0) return;
 
-            pedido.push({ cve_producto, nombre, precio, cantidad });
+            // Buscar si ya existe el producto en el pedido
+            const existente = pedido.find(item => item.cve_producto === cve_producto);
+            if (existente) {
+                existente.cantidad += cantidad; // Sumar cantidad
+            } else {
+                pedido.push({ cve_producto, nombre, precio, cantidad });
+            }
 
             renderPedido();
 
             // Reset selección visual
             card.classList.remove("selected");
             card.querySelector(".cantidad-container").classList.add("d-none");
+            card.querySelector(".cantidad-input").value = 1; // Reset a 1
         });
     });
+
 
     document.getElementById("efectivo").addEventListener("input", () => {
         renderPedido();
@@ -231,6 +239,12 @@ while ($row = $result->fetch_assoc()) {
                 pedido = [];
                 document.getElementById("efectivo").value = "";
                 renderPedido();
+
+                // Reiniciar las cantidades de todos los productos a 1
+                document.querySelectorAll(".cantidad-input").forEach(input => {
+                    input.value = 1;
+                });
+
                 bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvasPedido")).hide();
 
                 //Abrir e imprimir ticket sin mostrarlo al usuario
@@ -251,19 +265,19 @@ while ($row = $result->fetch_assoc()) {
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-    const lazyImages = document.querySelectorAll('img.lazy-img');
-    const observer = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.remove("lazy-img");
-                observer.unobserve(img);
-            }
+        const lazyImages = document.querySelectorAll('img.lazy-img');
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove("lazy-img");
+                    observer.unobserve(img);
+                }
+            });
         });
-    });
 
-    lazyImages.forEach(img => observer.observe(img));
-});
+        lazyImages.forEach(img => observer.observe(img));
+    });
 
 </script>
